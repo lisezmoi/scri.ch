@@ -1,0 +1,18 @@
+html{width:100%;}
+body{margin:80px 0px 0 0px;font:17px Verdana;letter-spacing:1px;}
+h1,h2,h3{font:normal 17px Verdana;}
+h1{margin:0 0 60px 0;padding:0 20px;}
+h2{margin:15px 0 5px 0;}
+h3{margin:12px 0 10px 0;}
+p, ul{list-style-type:none;margin:0;}
+ul li{margin:0;}
+ul{padding:0;}
+h3 span{margin:0 0 5px 0;border-bottom:1px solid black;}
+a, a:visited{color:black;text-decoration:none;}
+a:hover{color:gray;}
+form{display:inline;position:relative;top:6px;}
+.pagination{clear:both;background:yellow;padding:0 20px; margin:0 0 20px 0;}
+#draw-list{margin:0 20px;}
+#draw-list li{float:left;width:100%;margin:0 0 30px 0;}
+#draw-list li a{float:left;max-width:100%;}
+#draw-list li img{float:left;max-width:100%;border:1px dotted grey;}

@@ -1,0 +1,10 @@
+Options -MultiViews +FollowSymlinks
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+# Change this to the scri.ch location
+RewriteBase /scri.ch/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?r=$1 [L,NC,QSA]
+</IfModule>
