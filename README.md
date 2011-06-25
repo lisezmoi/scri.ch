@@ -9,7 +9,7 @@ scri.ch is a minimal web app that lets you draw, share, and fork existing drawin
 ## How to use
 
 1. Draw on the main blank page
-2. Save using the "save" button
+2. Save using the "Save" button
 3. Copy the url and share it
 4. Continue your drawing or make a new one by clicking on the "New" button
 
@@ -22,8 +22,7 @@ scri.ch is a minimal web app that lets you draw, share, and fork existing drawin
  * [Download scri.ch](https://github.com/bpierre/scri.ch/zipball/master)
  * Exctract the package on your server
  * Create a new database
- * Edit `config.php` at the root dirrectory
- 
+ * Edit `config.php` in the root directory
 
 Full URL with trailing slash
 
