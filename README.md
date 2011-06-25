@@ -1,10 +1,8 @@
 # scri.ch
 
-## Demo
-[Try it live](http://scri.ch/ "Try scri.ch")
-
-## Description
 scri.ch is a minimal web app that lets you draw, share, and fork existing drawings.
+
+[Try it live](http://scri.ch/ "Try scri.ch")
 
 ## How to use
 
@@ -22,27 +20,31 @@ scri.ch is a minimal web app that lets you draw, share, and fork existing drawin
  * [Download scri.ch](https://github.com/bpierre/scri.ch/zipball/master)
  * Exctract the package on your server
  * Create a new database
- * Edit `config.php` in the root directory
+ * Execute `schema.sql` on the database **then delete it**
+ * Rename `config-example.php` to `config.php`
+ * Edit `config.php`
 
-Full URL with trailing slash
+### config.php
 
     define('SCRICH_URL', 'scri.ch/');
 
-Database DSN ([PDO style](http://php.net/manual/en/ref.pdo-mysql.connection.php))
+Full URL with trailing slash
 
     define('DB_DSN',  'mysql:dbname=scrich;host=localhost');
 
-Database username
+Database DSN ([PDO style](http://php.net/manual/en/ref.pdo-mysql.connection.php))
 
     define('DB_USER', 'username');
 
-Database password
+Database username
 
     define('DB_PASS', 'password');
 
-Wanna debug?
+Database password
 
     define('DEBUG', FALSE);
+
+Wanna debug?
 
 ## Credits
 
