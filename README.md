@@ -18,7 +18,8 @@ scri.ch is a minimal web app that lets you draw, share, and fork existing drawin
 ## Installation
 
  * [Download scri.ch](https://github.com/bpierre/scri.ch/zipball/master)
- * Exctract the package on your server
+ * Extract the package on your server
+ * /tmp and /draws directories should be writable by the server
  * Create a new database
  * Execute `schema.sql` on the database **then delete it**
  * Rename `config-example.php` to `config.php`
