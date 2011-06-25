@@ -50,3 +50,7 @@ Wanna debug?
 ## Credits
 
 [Pierre Bertet](http://www.pierrebertet.net/) and [Raphaël Bastide](http://raphaelbastide.com)
+
+## More info
+
+[See about page](http://about.scri.ch/)
