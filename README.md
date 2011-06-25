@@ -51,6 +51,9 @@ Wanna debug?
 
 [Pierre Bertet](http://www.pierrebertet.net/) and [Raphaël Bastide](http://raphaelbastide.com)
 
+ * [Aude Debout](http://aude-debout.fr/): 404 drawing, testing
+ * [Quick and Dirty](https://twitter.com/qndirty) (pro scricher): testing, evangelism
+
 ## More info
 
 [See about page](http://about.scri.ch/)
