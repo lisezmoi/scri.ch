@@ -4,6 +4,8 @@ scri.ch is a minimal web app that lets you draw, share, and fork existing drawin
 
 [Try it live](http://scri.ch/ "Try scri.ch")
 
+It is compatible with every modern browser, including mobile devices.
+
 ## How to use
 
 1. Draw on the main blank page
