@@ -21,11 +21,11 @@ It is compatible with every modern browser, including mobile devices.
 
  * [Download scri.ch](https://github.com/bpierre/scri.ch/zipball/master)
  * Extract the package on your server
- * /tmp and /draws directories should be writable by the server
+ * /tmp and /draws directories must be writable by the webserver
  * Create a new database
  * Execute `schema.sql` on the database **then delete it**
  * Rename `config-example.php` to `config.php`
- * Edit `config.php`
+ * Edit `config.php` (see below)
 
 ### config.php
 
