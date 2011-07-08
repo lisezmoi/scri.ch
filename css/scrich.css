@@ -19,9 +19,7 @@ button::-moz-focus-inner{padding:0;border:0;}
     color:gray;
 }
 #about:hover,
-#about:focus{
-    color:black;
-}
+#about:focus{color:black;}
 button{
     clear:both;
     font-size:28px;
@@ -54,3 +52,20 @@ button:active{
 ::selection{background:#FFFFD7;}
 ::-moz-selection{background:#FFFFD7;}
 ::-moz-selection {color:#00FF00;}
+
+/*iphone 320*480 */
+@media only screen and (max-device-width: 480px){
+	button{
+		font-size:14px;
+		letter-spacing:0px;
+		width:40px;
+		height:23px;
+		margin:0 0 15px 0;
+		padding:2px 3px 4px 4px;
+	}
+	#buttons{
+		position:fixed;
+		top:15px;
+		right:12px;
+	}
+}
