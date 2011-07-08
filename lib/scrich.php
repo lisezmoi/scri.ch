@@ -3,7 +3,14 @@ define('SCRICH_VERSION', '1');
 define('SCRICH_ROOT', realpath(__DIR__ . '/..'));
 
 require_once SCRICH_ROOT.'/config.php';
-require_once SCRICH_ROOT.'/lib/draw_model.php';
+require_once SCRICH_ROOT.'/lib/draw-model.php';
+
+function serve_image($img) {
+  header("Content-type: image/png");
+  header('Content-Length: ' . filesize($img));
+  readfile($img);
+  exit;
+}
 
 function scrich_init() {
   global $cur_img, $title;
@@ -21,12 +28,13 @@ function scrich_init() {
       
       // Direct image
       if (preg_match('/^[a-z0-9]+\.png$/', $request) && file_exists('draws/'.$request)) {
-        header("Content-type: image/png");
-        header('Content-Length: ' . filesize('draws/'.$request));
-        readfile('draws/'.$request);
-        exit();
+        serve_image('draws/'.$request);
+        
+      } elseif ($request === '404.png') {
+        serve_image('assets/404.png');
         
       } else {
+        
         $draw_m = new DrawModel();
         
         // Get drawing
@@ -42,6 +50,6 @@ function scrich_init() {
     }
     
     // Include template
-    include_once SCRICH_ROOT.'/pages/draw.php';
+    include_once SCRICH_ROOT.'/lib/template.php';
   }
 }

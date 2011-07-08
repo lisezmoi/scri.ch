@@ -1,3 +1,4 @@
+<?php if (!defined('SCRICH_VERSION')) { header('HTTP/1.0 403 Forbidden'); exit; } ?>
 <!doctype html>
 <!--
 
@@ -33,9 +34,9 @@ CONTACT
 		<title><?php if (isset($title)) { echo $title . ' | '; } ?>scri.ch</title>
 		<meta name="description" content="scri.ch is a website that lets you draw.">
 		<meta name="keywords" content="scrich">
-		<link rel="stylesheet" href="<?php echo SCRICH_URL ?>css/scrich.css?<?php echo SCRICH_VERSION ?>">
-		<link rel="icon" type="image/png" href="<?php echo SCRICH_URL ?>favicon.png">
-		<link rel="apple-touch-icon" href="<?php echo SCRICH_URL ?>apple-touch-icon.png">
+		<link rel="stylesheet" href="<?php echo SCRICH_URL ?>assets/scrich.css?<?php echo SCRICH_VERSION ?>">
+		<link rel="icon" type="image/png" href="<?php echo SCRICH_URL ?>assets/favicon.png">
+		<link rel="apple-touch-icon" href="<?php echo SCRICH_URL ?>assets/apple-touch-icon.png">
 		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no;">
 		<style><?php if ($cur_img): ?>#save{display:none;}<?php else: ?>#buttons button,#about{display:none;}<?php endif; ?></style>
 	</head>
@@ -50,6 +51,6 @@ CONTACT
 <?php if ($cur_img): ?>
 		<img id="img" src="<?php echo SCRICH_URL.$cur_img ?>.png" /><?php endif; ?>
 		<script>var SCRICH_URL = '<?php echo SCRICH_URL ?>';</script>
-		<script src="<?php echo SCRICH_URL ?>js/scrich<?php if (!DEBUG): ?>-min<?php endif; ?>.js?<?php echo SCRICH_VERSION ?>"></script>
+		<script src="<?php echo SCRICH_URL ?>assets/scrich<?php if (!DEBUG): ?>-min<?php endif; ?>.js?<?php echo SCRICH_VERSION ?>"></script>
 	</body>
 </html>

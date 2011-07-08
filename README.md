@@ -4,6 +4,8 @@ scri.ch is a minimal web app that lets you draw, share, and fork existing drawin
 
 [Try it live](http://scri.ch/ "Try scri.ch")
 
+It is compatible with every modern browser, including mobile devices.
+
 ## How to use
 
 1. Draw on the main blank page
@@ -19,11 +21,11 @@ scri.ch is a minimal web app that lets you draw, share, and fork existing drawin
 
  * [Download scri.ch](https://github.com/bpierre/scri.ch/zipball/master)
  * Extract the package on your server
- * /tmp and /draws directories should be writable by the server
+ * /tmp and /draws directories must be writable by the webserver
  * Create a new database
  * Execute `schema.sql` on the database **then delete it**
  * Rename `config-example.php` to `config.php`
- * Edit `config.php`
+ * Edit `config.php` (see below)
 
 ### config.php
 
@@ -49,7 +51,10 @@ Wanna debug?
 
 ## Credits
 
-[Pierre Bertet](http://www.pierrebertet.net/) and [Raphaël Bastide](http://raphaelbastide.com)
+A simple idea by [Pierre Bertet](http://pierrebertet.net/) and [Raphaël Bastide](http://raphaelbastide.com)
+
+ * [Aude Debout](http://aude-debout.fr/): 404 drawing, testing
+ * [Quick and Dirty](https://twitter.com/qndirty) (pro scricher): testing, evangelism
 
 ## More info
 

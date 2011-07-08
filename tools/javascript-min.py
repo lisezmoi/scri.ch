@@ -3,8 +3,8 @@ import httplib, urllib, sys, os
 
 root = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
-jsfile    = open(root + '/js/scrich.js')
-jsminfile = open(root + '/js/scrich-min.js', 'w')
+jsfile    = open(root + '/assets/scrich.js')
+jsminfile = open(root + '/assets/scrich-min.js', 'w')
 
 # Define the parameters for the POST request and encode them in
 # a URL-safe format.
