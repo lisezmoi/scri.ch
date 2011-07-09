@@ -1,5 +1,5 @@
 <?php
-define('SCRICH_VERSION', '1');
+define('SCRICH_VERSION', '1.1');
 define('SCRICH_ROOT', realpath(__DIR__ . '/..'));
 
 require_once SCRICH_ROOT.'/config.php';
@@ -23,8 +23,9 @@ function scrich_init() {
     
   } else {
     
-    if (isset($_GET["r"])) {
-      $request = $_GET["r"];
+    if (isset($_GET["r"]) && $_GET["r"] !== '/') {
+      
+      $request = ltrim($_GET["r"], '/');
       
       // Direct image
       if (preg_match('/^[a-z0-9]+\.png$/', $request) && file_exists('draws/'.$request)) {

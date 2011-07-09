@@ -1,5 +1,4 @@
 <?php
-
 class DrawModel
 {
   /*
@@ -28,7 +27,7 @@ class DrawModel
   
   /* Returns last draw */
   public function get_last() {
-    $sql = 'SELECT short_id, date FROM draws WHERE id = (SELECT MAX(id) FROM draws) FROM draws';
+    $sql = 'SELECT short_id, date FROM draws WHERE id = (SELECT MAX(id) FROM draws)';
     $sth = $this->pdo->prepare($sql);
     $sth->execute();
     $res = $sth->fetch();
@@ -85,7 +84,8 @@ class DrawModel
             || in_array(DrawModel::get_short_id($next_id), $this->reserved_short_ids) ) {
       $next_id += 1;
     }
-    return DrawModel::get_short_id($next_id);
+    $next_short_id = DrawModel::get_short_id($next_id);
+    return $next_short_id;
   }
   
   /* Save image to disk and returns a tmp. file path */
