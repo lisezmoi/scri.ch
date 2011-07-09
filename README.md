@@ -51,11 +51,11 @@ Wanna debug?
 
 ### .htaccess (Apache HTTP Server)
 
-If you are using the Apache HTTP Server, change the RewriteBase directive to the scri.ch path (default is /).
+If you are using the Apache HTTP Server, change the `RewriteBase` directive to the scri.ch path (default is `/`).
 
 ### Other HTTP server (Nginx, Lighttpd, etc.)
 
-If you are using another HTTP server, just redirect all requests to: `index.php?r=$request`.
+If you are using another HTTP server, you just need to redirect all requests to: `index.php?r=$request`.
 
 ## Credits
 
