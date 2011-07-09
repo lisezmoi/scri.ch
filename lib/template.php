@@ -32,8 +32,6 @@ CONTACT
 	<head>
 		<meta charset="utf-8">
 		<title><?php if (isset($title)) { echo $title . ' | '; } ?>scri.ch</title>
-		<meta name="description" content="scri.ch is a website that lets you draw.">
-		<meta name="keywords" content="scrich">
 		<link rel="stylesheet" href="<?php echo SCRICH_URL ?>assets/scrich.css?<?php echo SCRICH_VERSION ?>">
 		<link rel="icon" type="image/png" href="<?php echo SCRICH_URL ?>assets/favicon.png">
 		<link rel="apple-touch-icon" href="<?php echo SCRICH_URL ?>assets/apple-touch-icon.png">
