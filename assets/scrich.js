@@ -12,12 +12,17 @@
       minWidth  = 0,
       minHeight = 0,
       drew      = false,
-      ctx       = canv.getContext("2d"),
+      ctx       = null,
       copyCanv  = d.createElement('canvas');
+      copyCtx  = null;
   
   if (!canv.getContext) {
-    w.alert("Please, use a modern browser.");
+    w.alert("Your browser does not support canvas, you need to update it before using scri.ch.");
+    return;
   }
+  
+  ctx = canv.getContext("2d");
+  copyCtx = copyCanv.getContext("2d");
   
   // Webkit fix
   d.onselectstart = function(){return false;};
@@ -26,22 +31,18 @@
     
     // Save img data
     var imgData = ctx.getImageData(0, 0, canv.width, canv.height);
-    // Resize canvas
-    canv.width  = 0;
-    canv.height = 0;
     
-    var newW = toWidth  || ((w.innerWidth > minWidth)?  w.innerWidth : minWidth);
-    var newH = toHeight || ((w.innerHeight > minHeight)?  w.innerHeight : minHeight);
-    canv.width  = newW;
-    canv.height = newH;
+    // Resize canvas
+    canv.width  = toWidth  || ((w.innerWidth > minWidth)?  w.innerWidth : minWidth);
+    canv.height = toHeight || ((w.innerHeight > minHeight)?  w.innerHeight : minHeight);
     
     // Restore img data
-    //ctx.putImageData(imgData, 0, 0);
+    // ctx.putImageData(imgData, 0, 0);
     
-    // Firefox fix
-    copyCanv.setAttribute('width', imgData.width);
-    copyCanv.setAttribute('height', imgData.height);
-    copyCanv.getContext('2d').putImageData(imgData, 0, 0);
+    // Firefox fix, need to copy it to another canvas
+    copyCanv.width = imgData.width;
+    copyCanv.height = imgData.height;
+    copyCtx.putImageData(imgData, 0, 0);
     
     ctx.drawImage(copyCanv, 0, 0);
   }
