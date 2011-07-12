@@ -4,9 +4,11 @@ define('SCRICH_ROOT', realpath(__DIR__ . '/..'));
 
 require_once SCRICH_ROOT.'/config.php';
 require_once SCRICH_ROOT.'/lib/draw-model.php';
+require_once SCRICH_ROOT.'/lib/drawing-settings.php';
 
+// Send a PNG image and exit PHP
 function serve_image($img) {
-  header("Content-type: image/png");
+  header('Content-type: image/png');
   header('Content-Length: ' . filesize($img));
   readfile($img);
   exit;
@@ -15,39 +17,51 @@ function serve_image($img) {
 function scrich_init() {
   global $cur_img, $title;
   
-  if (isset($_POST["new_draw"])) {
-    $img = $_POST["new_draw"];
+  if (isset($_POST['new_draw'])) {
+    $img = $_POST['new_draw'];
+    $settings = DrawingSettings::get_save_drawing_settings();
+    if ($settings !== NULL) {
+      $settings = serialize($settings);
+    }
+    
     $draw_m = new DrawModel();
-    $short_id = $draw_m->save($img);
+    $short_id = $draw_m->save($img, NULL, $settings);
     header('Location: '.SCRICH_URL.$short_id);
     
   } else {
     
-    if (isset($_GET["r"]) && $_GET["r"] !== '/') {
+    // Init settings
+    $settings = array();
+    
+    if (isset($_GET['r']) && $_GET['r'] !== '/') { // Existing drawing
       
-      $request = ltrim($_GET["r"], '/');
+      $request = ltrim($_GET['r'], '/');
       
       // Direct image
       if (preg_match('/^[a-z0-9]+\.png$/', $request) && file_exists('draws/'.$request)) {
         serve_image('draws/'.$request);
-        
+      
+      // Serve 404.png (from the assets/ dir)
       } elseif ($request === '404.png') {
         serve_image('assets/404.png');
-        
+      
+      // Load an existing drawing
       } else {
-        
         $draw_m = new DrawModel();
-        
-        // Get drawing
-        $cur_img = $draw_m->get($request);
+        $cur_drawing = $draw_m->get($request); // Get drawing
+        $cur_img = $cur_drawing['short_id'];
+        $scrich_settings = json_encode(unserialize($cur_drawing['settings']));
         
         // 404
         if (!$cur_img) {
           header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
           $cur_img = '404';
+          $scrich_settings = '{}';
           $title = '404 Not Found';
         }
       }
+    } else { // New drawing
+      $scrich_settings = DrawingSettings::get_new_drawing_settings();
     }
     
     // Include template

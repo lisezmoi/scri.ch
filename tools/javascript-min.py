@@ -6,6 +6,18 @@ root = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 jsfile    = open(root + '/assets/scrich.js')
 jsminfile = open(root + '/assets/scrich-min.js', 'w')
 
+js_externs = (
+    'window.document.onselectstart',
+    'window.SCRICH_URL',
+    'window.SCRICH_SETTINGS',
+    'window.SCRICH_SETTINGS.background',
+    'window.SCRICH_SETTINGS.foreground',
+    'window.SCRICH_SETTINGS.margin',
+    'window.SCRICH_SETTINGS.size',
+    'window.SCRICH_SETTINGS.size.height',
+    'window.SCRICH_SETTINGS.size.width',
+)
+
 # Define the parameters for the POST request and encode them in
 # a URL-safe format.
 params = urllib.urlencode([
@@ -13,7 +25,7 @@ params = urllib.urlencode([
     ('compilation_level', 'ADVANCED_OPTIMIZATIONS'),
     ('output_format', 'text'),
     ('output_info', 'compiled_code'),
-    ('js_externs', 'window.document.onselectstart;window.SCRICH_URL;'),
+    ('js_externs', ';'.join(js_externs)),
     ('js_code', jsfile.read()),
     #('formatting', 'pretty_print'),
   ])

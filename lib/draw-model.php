@@ -14,20 +14,16 @@ class DrawModel
   
   /* Returns a draw */
   public function get($short_id) {
-    $sql = 'SELECT short_id, date FROM draws WHERE short_id = :short_id';
+    $sql = 'SELECT short_id, settings, date FROM draws WHERE short_id = :short_id';
     $sth = $this->pdo->prepare($sql);
     $sth->bindValue(':short_id', $short_id);
     $sth->execute();
-    $res = $sth->fetch();
-    if ($res) {
-      return $res[0];
-    }
-    return false;
+    return $sth->fetch();
   }
   
   /* Returns last draw */
   public function get_last() {
-    $sql = 'SELECT short_id, date FROM draws WHERE id = (SELECT MAX(id) FROM draws)';
+    $sql = 'SELECT short_id, settings, date FROM draws WHERE id = (SELECT MAX(id) FROM draws)';
     $sth = $this->pdo->prepare($sql);
     $sth->execute();
     $res = $sth->fetch();
@@ -69,9 +65,9 @@ class DrawModel
   }
   
   /* Save a new draw to database */
-  public function save($data, $parent=NULL) {
+  public function save($data, $parent=NULL, $settings=NULL) {
     $tmp_file = $this->data_to_file($data);
-    $short_id = $this->insert_drawing($parent);
+    $short_id = $this->insert_drawing($parent, $settings);
     rename($tmp_file, SCRICH_ROOT.'/draws/'.$short_id.'.png');
     return $short_id;
   }
@@ -99,12 +95,13 @@ class DrawModel
   }
   
   /* Insert a new image in DB */
-  private function insert_drawing($parent) {
-    $sql = 'INSERT INTO draws VALUES (NULL, :next_short_id, NULL, :parent)';
+  private function insert_drawing($parent=NULL, $settings=NULL) {
+    $sql = 'INSERT INTO draws VALUES (NULL, :next_short_id, :parent, :settings, NULL)';
     $sth = $this->pdo->prepare($sql);
     $next_short_id = $this->get_next_short_id();
-    $sth->bindParam(':next_short_id', $next_short_id);
     $sth->bindParam(':parent', $parent);
+    $sth->bindParam(':next_short_id', $next_short_id);
+    $sth->bindParam(':settings', $settings);
     $sth->execute();
     return $next_short_id;
   }

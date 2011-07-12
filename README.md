@@ -13,6 +13,31 @@ It is compatible with every modern browser, including mobile devices.
 3. Copy the url and share it
 4. Continue your drawing or make a new one by clicking on the "New" button
 
+## URL settings
+
+You can define some settings when starting a new drawing, eg. `http://scri.ch/?background=ddd&foreground=666`
+
+### background
+
+The background color in hexadecimal, without the `#`. Shortcuts allowed. Eg. `http://scri.ch/?background=ddd`
+
+### foreground
+
+The foreground color in hexadecimal, without the `#`. Shortcuts allowed. Eg. `http://scri.ch/?foreground=ddd`
+
+### size
+
+The canvas size, in pixels. Syntax:
+
+ * `?size=400`: define same width and height
+ * `?size=400x`: define width only
+ * `?size=x400`: define height only
+ * `?size=400x300`: define both width and height
+
+### margin
+
+The margin around the canvas, in pixels. Eg. `http://scri.ch/?margin=100`
+
 ## Requirements
  * PHP 5.3
  * MySQL 5.x

@@ -45,10 +45,16 @@ CONTACT
 			<button id="save">Save</button>
 			<a href="http://about.scri.ch/" id="about" title="About scri.ch">?</a>
 		</div>
-		<form action="" method="post" id="form"><input type="hidden" id="new_draw" name="new_draw" value=""></form>
+		<form action="" method="post" id="form">
+			<input type="hidden" id="new_draw" name="new_draw" value="">
+			<input type="hidden" id="settings" name="settings" value="">
+		</form>
 <?php if ($cur_img): ?>
 		<img id="img" src="<?php echo SCRICH_URL.$cur_img ?>.png" /><?php endif; ?>
-		<script>var SCRICH_URL = '<?php echo SCRICH_URL ?>';</script>
+		<script>
+			var SCRICH_URL = '<?php echo SCRICH_URL ?>';
+			var SCRICH_SETTINGS = <?php echo $scrich_settings ?>;
+		</script>
 		<script src="<?php echo SCRICH_URL ?>assets/scrich<?php if (!DEBUG): ?>-min<?php endif; ?>.js?<?php echo SCRICH_VERSION ?>"></script>
 	</body>
 </html>
