@@ -3,7 +3,7 @@ define('SCRICH_VERSION', '1.1');
 define('SCRICH_ROOT', realpath(__DIR__ . '/..'));
 
 require_once SCRICH_ROOT.'/config.php';
-require_once SCRICH_ROOT.'/lib/draw-model.php';
+require_once SCRICH_ROOT.'/lib/drawing-model.php';
 require_once SCRICH_ROOT.'/lib/drawing-settings.php';
 
 // Send a PNG image and exit PHP
@@ -17,15 +17,15 @@ function serve_image($img) {
 function scrich_init() {
   global $cur_img, $title;
   
-  if (isset($_POST['new_draw'])) {
-    $img = $_POST['new_draw'];
+  if (isset($_POST['new_drawing'])) {
+    $img = $_POST['new_drawing'];
     $settings = DrawingSettings::get_save_drawing_settings();
     if ($settings !== NULL) {
       $settings = serialize($settings);
     }
     
-    $draw_m = new DrawModel();
-    $short_id = $draw_m->save($img, NULL, $settings);
+    $drawing_m = new DrawingModel();
+    $short_id = $drawing_m->save($img, NULL, $settings);
     header('Location: '.SCRICH_URL.$short_id);
     
   } else {
@@ -38,8 +38,8 @@ function scrich_init() {
       $request = ltrim($_GET['r'], '/');
       
       // Direct image
-      if (preg_match('/^[a-z0-9]+\.png$/', $request) && file_exists('draws/'.$request)) {
-        serve_image('draws/'.$request);
+      if (preg_match('/^[a-z0-9]+\.png$/', $request) && file_exists('drawings/'.$request)) {
+        serve_image('drawings/'.$request);
       
       // Serve 404.png (from the assets/ dir)
       } elseif ($request === '404.png') {
@@ -47,8 +47,8 @@ function scrich_init() {
       
       // Load an existing drawing
       } else {
-        $draw_m = new DrawModel();
-        $cur_drawing = $draw_m->get($request); // Get drawing
+        $drawing_m = new DrawingModel();
+        $cur_drawing = $drawing_m->get($request); // Get drawing
         $cur_img = $cur_drawing['short_id'];
         $scrich_settings = json_encode(unserialize($cur_drawing['settings']));
         

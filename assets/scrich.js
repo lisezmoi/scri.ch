@@ -2,12 +2,12 @@
   
   var started   = false,
       gid       = function(id){return document.getElementById(id);},
-      canv      = gid('draw'),
+      canv      = gid('drawing'),
       bsave     = gid('save'),
       bnew      = gid('new'),
       img       = gid('img'),
       form      = gid('form'),
-      ndraw     = gid('new_draw'),
+      ndrawing     = gid('new_drawing'),
       settings  = gid('settings'),
       about     = gid('about'),
       minWidth  = 0,
@@ -187,7 +187,7 @@
       resizeCanvas(minWidth, minHeight);
       if (minWidth > 0 && minHeight > 0) {
         settings.value = JSON.stringify(w.SCRICH_SETTINGS);
-        ndraw.value = canv.toDataURL('image/png').replace(/^data:image\/png;base64,/, '');
+        ndrawing.value = canv.toDataURL('image/png').replace(/^data:image\/png;base64,/, '');
         form.submit();
       }
       resizeCanvas(canvCurrentWidth, canvCurrentHeight);

@@ -39,14 +39,14 @@ CONTACT
 		<style><?php if ($cur_img): ?>#save{display:none;}<?php else: ?>#buttons button,#about{display:none;}<?php endif; ?></style>
 	</head>
 	<body>
-		<canvas id="draw"></canvas>
+		<canvas id="drawing"></canvas>
 		<div id="buttons">
 			<button id="new">New</button>
 			<button id="save">Save</button>
 			<a href="http://about.scri.ch/" id="about" title="About scri.ch">?</a>
 		</div>
 		<form action="" method="post" id="form">
-			<input type="hidden" id="new_draw" name="new_draw" value="">
+			<input type="hidden" id="new_drawing" name="new_drawing" value="">
 			<input type="hidden" id="settings" name="settings" value="">
 		</form>
 <?php if ($cur_img): ?>

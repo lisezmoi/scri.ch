@@ -13,7 +13,7 @@ a:hover{color:gray;}
 form{display:inline;position:relative;top:6px;}
 .pagination{clear:both;margin:0 0 20px 20px;}
 .pagination a{background:yellow;padding:5px 20px; margin:0 20px 0 0;}
-#draw-list{margin:0 20px;}
-#draw-list li{float:left;width:100%;margin:0 0 30px 0;}
-#draw-list li a{float:left;max-width:100%;}
-#draw-list li img{float:left;max-width:100%;border:1px dotted grey;}
+#drawing-list{margin:0 20px;}
+#drawing-list li{float:left;width:100%;margin:0 0 30px 0;}
+#drawing-list li a{float:left;max-width:100%;}
+#drawing-list li img{float:left;max-width:100%;border:1px dotted grey;}

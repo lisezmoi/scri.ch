@@ -1,4 +1,4 @@
-CREATE TABLE `draws` (
+CREATE TABLE `drawings` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `short_id` varchar(200) NOT NULL,
   `parent` int(11) unsigned,

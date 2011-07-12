@@ -46,7 +46,7 @@ The margin around the canvas, in pixels. Eg. `http://scri.ch/?margin=100`
 
  * [Download scri.ch](https://github.com/bpierre/scri.ch/zipball/master)
  * Extract the package on your server
- * /tmp and /draws directories must be writable by the webserver
+ * /tmp and /drawings directories must be writable by the webserver
  * Create a new database
  * Execute `schema.sql` on the database **then delete it**
  * Rename `config-example.php` to `config.php`

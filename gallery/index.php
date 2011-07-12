@@ -1,17 +1,17 @@
 <?php
 require_once '../lib/scrich.php';
 
-$draw_m = new DrawModel();
+$drawing_m = new DrawingModel();
 
 $page = 1;
-$draws_by_page = 50;
+$drawings_by_page = 50;
 
 if (isset($_GET['p'])) {
   $page = (int)$_GET['p'];
 }
 
-$draws = $draw_m->get_range($page-1, $draws_by_page);
-$draws_count = $draw_m->get_count();
-$nb_pages = (int)ceil($draws_count/$draws_by_page);
+$drawings = $drawing_m->get_range($page-1, $drawings_by_page);
+$drawings_count = $drawing_m->get_count();
+$nb_pages = (int)ceil($drawings_count/$drawings_by_page);
 
 include_once './template.php';

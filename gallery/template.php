@@ -22,14 +22,14 @@
 		<link rel="apple-touch-icon" href="<?php echo SCRICH_URL ?>assets/apple-touch-icon.png">
 	</head>
 	<body>
-		<h1>Drawings - <?php echo $page ?>/<?php echo $nb_pages ?> - (total <?php echo $draws_count ?>)</h1>
+		<h1>Drawings - <?php echo $page ?>/<?php echo $nb_pages ?> - (total <?php echo $drawings_count ?>)</h1>
 		<?php tpl_pagination(); ?>
-		<ul id="draw-list">
-			<?php foreach ($draws as $draw): ?>
+		<ul id="drawing-list">
+			<?php foreach ($drawings as $drawing): ?>
 			<li>
-				<h2>/<?php echo $draw->short_id ?> <span>(<?php echo date("G:i j/m/Y", strtotime($draw->date)) ?>)</span></h2>
-				<a href="<?php echo SCRICH_URL.$draw->short_id ?>">
-					<img src="<?php echo SCRICH_URL.$draw->short_id ?>.png">
+				<h2>/<?php echo $drawing->short_id ?> <span>(<?php echo date("G:i j/m/Y", strtotime($drawing->date)) ?>)</span></h2>
+				<a href="<?php echo SCRICH_URL.$drawing->short_id ?>">
+					<img src="<?php echo SCRICH_URL.$drawing->short_id ?>.png">
 				</a>
 			</li>
 			<?php endforeach ?>

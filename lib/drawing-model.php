@@ -1,9 +1,9 @@
 <?php
-class DrawModel
+class DrawingModel
 {
   /*
    * Draw model
-   * Permits to retrieving and saving draws.
+   * Permits to retrieving and saving drawings.
    */
   private $pdo;
   
@@ -12,18 +12,18 @@ class DrawModel
     $this->reserved_short_ids = array('404','admin','gallery','feed','live');
   }
   
-  /* Returns a draw */
+  /* Returns a drawing */
   public function get($short_id) {
-    $sql = 'SELECT short_id, settings, date FROM draws WHERE short_id = :short_id';
+    $sql = 'SELECT short_id, settings, date FROM drawings WHERE short_id = :short_id';
     $sth = $this->pdo->prepare($sql);
     $sth->bindValue(':short_id', $short_id);
     $sth->execute();
     return $sth->fetch();
   }
   
-  /* Returns last draw */
+  /* Returns last drawing */
   public function get_last() {
-    $sql = 'SELECT short_id, settings, date FROM draws WHERE id = (SELECT MAX(id) FROM draws)';
+    $sql = 'SELECT short_id, settings, date FROM drawings WHERE id = (SELECT MAX(id) FROM drawings)';
     $sth = $this->pdo->prepare($sql);
     $sth->execute();
     $res = $sth->fetch();
@@ -34,9 +34,9 @@ class DrawModel
     return '0';
   }
   
-  /* Retuns a draws collection */
+  /* Retuns a drawings collection */
   public function get_range($offset, $limit) {
-    $sql = 'SELECT short_id, date FROM draws ORDER BY id DESC LIMIT :offset, :limit';
+    $sql = 'SELECT short_id, date FROM drawings ORDER BY id DESC LIMIT :offset, :limit';
     $sth = $this->pdo->prepare($sql);
     $sth->bindValue(':offset', $offset * $limit, PDO::PARAM_INT);
     $sth->bindValue(':limit', $limit, PDO::PARAM_INT);
@@ -55,32 +55,32 @@ class DrawModel
     return $results;
   }
   
-  /* Returns the draws total count */
+  /* Returns the drawings total count */
   public function get_count() {
-    $sql = 'SELECT COUNT(*) FROM draws';
+    $sql = 'SELECT COUNT(*) FROM drawings';
     $sth = $this->pdo->prepare($sql);
     $sth->execute();
     $res = $sth->fetch();
     return $res[0];
   }
   
-  /* Save a new draw to database */
+  /* Save a new drawing to database */
   public function save($data, $parent=NULL, $settings=NULL) {
     $tmp_file = $this->data_to_file($data);
     $short_id = $this->insert_drawing($parent, $settings);
-    rename($tmp_file, SCRICH_ROOT.'/draws/'.$short_id.'.png');
+    rename($tmp_file, SCRICH_ROOT.'/drawings/'.$short_id.'.png');
     return $short_id;
   }
   
   /* Get next ID */
   private function get_next_short_id() {
     $last_short_id = $this->get_last();
-    $next_id = (int)DrawModel::get_id($last_short_id) + 1;
-    while ( $this->get(DrawModel::get_short_id($next_id)) !== false
-            || in_array(DrawModel::get_short_id($next_id), $this->reserved_short_ids) ) {
+    $next_id = (int)self::get_id($last_short_id) + 1;
+    while ( $this->get(self::get_short_id($next_id)) !== false
+            || in_array(self::get_short_id($next_id), $this->reserved_short_ids) ) {
       $next_id += 1;
     }
-    $next_short_id = DrawModel::get_short_id($next_id);
+    $next_short_id = self::get_short_id($next_id);
     return $next_short_id;
   }
   
@@ -96,7 +96,7 @@ class DrawModel
   
   /* Insert a new image in DB */
   private function insert_drawing($parent=NULL, $settings=NULL) {
-    $sql = 'INSERT INTO draws VALUES (NULL, :next_short_id, :parent, :settings, NULL)';
+    $sql = 'INSERT INTO drawings VALUES (NULL, :next_short_id, :parent, :settings, NULL)';
     $sth = $this->pdo->prepare($sql);
     $next_short_id = $this->get_next_short_id();
     $sth->bindParam(':parent', $parent);
