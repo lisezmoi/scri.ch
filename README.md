@@ -13,6 +13,7 @@ It is compatible with every modern browser, including mobile devices.
 3. Copy the url and share it
 4. Continue your drawing or make a new one by clicking on the "New" button
 
+<a name="URLParams"></a>
 ## URL params
 
 You can define some parameters when starting a new drawing, eg. `http://scri.ch/?background=ddd&foreground=666`
