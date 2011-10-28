@@ -88,8 +88,9 @@ If you are using another HTTP server, you just need to redirect all requests to:
 A simple idea by [Pierre Bertet](http://pierrebertet.net/) and [Raphaël Bastide](http://raphaelbastide.com)
 
  * [Aude Debout](http://aude-debout.fr/): 404 drawing, testing
- * [Quick and Dirty](https://twitter.com/qndirty) (pro scricher): testing, evangelism
- * [Jimpunk](http://www.jimpunk.com/.net/index.php?s=scri.ch) scri.ch artist
+ * [Quick and Dirty](https://twitter.com/qndirty): (pro scricher): testing, evangelism
+ * [Jimpunk](http://www.jimpunk.com/.net/index.php?s=scri.ch): scri.ch artist
+
 ## More info
 
 [See about page](http://about.scri.ch/)
