@@ -88,7 +88,7 @@ A simple idea by [Pierre Bertet](http://pierrebertet.net/) and [Raphaël Bastide
 
  * [Aude Debout](http://aude-debout.fr/): 404 drawing, testing
  * [Quick and Dirty](https://twitter.com/qndirty) (pro scricher): testing, evangelism
-
+ * [Jimpunk](http://www.jimpunk.com/.net/index.php?s=scri.ch) scri.ch artist
 ## More info
 
 [See about page](http://about.scri.ch/)
