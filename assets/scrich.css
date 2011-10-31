@@ -91,7 +91,6 @@ button:active {
 ::-moz-selection {
   color:#0f0;
 }
-
 /* Mobile browsers (Opera Mobile, Safari iOS, Chrome Android) */
 @media only screen and (max-device-width:480px) {
   button {
@@ -102,19 +101,15 @@ button:active {
     font-size:14px;
     letter-spacing:0;
   }
+  #about {
+    position:fixed;
+    top:0;
+    right:0;
+    padding:2px;
+  }
   #buttons {
     position:fixed;
     top:15px;
     right:12px;
   }
-}
-
-/* iPhone 4 */
-@media only screen and (-webkit-min-device-pixel-ratio: 2) {
-  
-}
-
-/* iPad */
-@media only screen and (min-device-width: 768px) and (max-device-width: 1024px), screen and (min-width: 768px) {
-  
 }
