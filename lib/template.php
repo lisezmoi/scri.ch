@@ -9,7 +9,7 @@
        /
       /
 
-scri.ch is a website that lets you draw.
+scri.ch is a hackable drawing tool
 
 More info: http://about.scri.ch
 
