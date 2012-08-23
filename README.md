@@ -49,13 +49,13 @@ The margin around the canvas, in pixels. Eg. `http://scri.ch/?margin=100`
  * Extract the package on your server
  * /tmp and /drawings directories must be writable by the webserver
  * Create a new database
- * Execute `schema.sql` on the database **then delete it**
+ * Execute `schema.sql` on the database
  * Rename `config-example.php` to `config.php`
  * Edit `config.php` (see below)
 
 ### config.php
 
-    define('SCRICH_URL', 'scri.ch/');
+    define('SCRICH_URL', 'http://scri.ch/');
 
 Full URL with trailing slash
 
