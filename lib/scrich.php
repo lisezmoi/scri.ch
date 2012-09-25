@@ -38,10 +38,26 @@ function scrich_init() {
       $request = ltrim($_GET['r'], '/');
       
       // Direct image
-      if (preg_match('/^[a-z0-9]+\.png$/', $request) && file_exists('drawings/'.$request)) {
-        serve_image('drawings/'.$request);
+      if (preg_match('/^[a-z0-9]+\.png$/', $request) && file_exists(SCRICH_ROOT.'/drawings/'.$request)) {
+        
+        $image_name = $request;
+        
+        // Crop image (if imagick is loaded)
+        if (isset($_GET['crop']) && extension_loaded('imagick')) {
+          $cropped_name = str_replace('.png', '-crop.png', $image_name);
+          if (!file_exists(SCRICH_ROOT.'/drawings/'.$cropped_name)) {
+            $im = new Imagick(SCRICH_ROOT.'/drawings/'.$image_name);
+            $im->trimImage(0);
+            $im->borderImage('transparent', 20, 20); // TODO: fetch the bg color in DB
+            $im->writeImage(SCRICH_ROOT.'/drawings/'.$cropped_name);
+          }
+          $image_name = $cropped_name;
+        }
+        
+        // Serve image
+        serve_image('drawings/'.$image_name);
       
-      // Serve 404.png (from the assets/ dir)
+        // Serve 404.png (from the assets/ dir)
       } elseif ($request === '404.png') {
         serve_image('assets/404.png');
       

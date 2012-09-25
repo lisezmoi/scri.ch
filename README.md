@@ -13,18 +13,17 @@ It is compatible with every modern browser, including mobile devices.
 3. Copy the url and share it
 4. Continue your drawing or make a new one by clicking on the "New" button
 
-<a name="URLParams"></a>
 ## URL params
 
-You can define some parameters when starting a new drawing, eg. `http://scri.ch/?background=ddd&foreground=666`
+You can define some parameters when starting a new drawing, e.g. `http://scri.ch/?background=ddd&foreground=666`
 
 ### background
 
-The background color in hexadecimal, without the `#`. Shortcuts allowed. Eg. `http://scri.ch/?background=ddd`
+The background color in hexadecimal, without the `#`. Shortcuts allowed. e.g. `http://scri.ch/?background=ddd`
 
 ### foreground
 
-The foreground color in hexadecimal, without the `#`. Shortcuts allowed. Eg. `http://scri.ch/?foreground=ddd`
+The foreground color in hexadecimal, without the `#`. Shortcuts allowed. e.g. `http://scri.ch/?foreground=ddd`
 
 ### size
 
@@ -39,9 +38,20 @@ The canvas size, in pixels. Syntax:
 
 The margin around the canvas, in pixels. Eg. `http://scri.ch/?margin=100`
 
+## URL params on images
+
+You can define some parameters on the .png URLs.
+
+### crop
+
+Crop an image to center the drawing.
+
+e.g. http://scri.ch/baf.png?crop
+
 ## Requirements
  * PHP 5.3
  * MySQL 5.x
+ * [Imagick](http://php.net/imagick) PHP Extension (optional)
 
 ## Installation
 
