@@ -65,23 +65,33 @@ e.g. http://scri.ch/baf.png?crop
 
 ### config.php
 
-    define('SCRICH_URL', 'http://scri.ch/');
+```php
+define('SCRICH_URL', 'http://scri.ch/');
+```
 
 Full URL with trailing slash
 
-    define('DB_DSN',  'mysql:dbname=scrich;host=localhost');
+```php
+define('DB_DSN',  'mysql:dbname=scrich;host=localhost');
+```
 
 Database DSN ([PDO style](http://php.net/manual/en/ref.pdo-mysql.connection.php))
 
-    define('DB_USER', 'username');
+```php
+define('DB_USER', 'username');
+```
 
 Database username
 
-    define('DB_PASS', 'password');
+```php
+define('DB_PASS', 'password');
+```
 
 Database password
 
-    define('DEBUG', FALSE);
+```php
+define('DEBUG', FALSE);
+```
 
 Wanna debug?
 
