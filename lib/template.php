@@ -34,7 +34,10 @@ CONTACT
 		<title><?php if (isset($title)) { echo $title . ' | '; } ?>scri.ch</title>
 		<link rel="stylesheet" href="<?php echo SCRICH_URL ?>assets/scrich.css?<?php echo SCRICH_VERSION ?>">
 		<link rel="icon" type="image/png" href="<?php echo SCRICH_URL ?>assets/favicon.png">
-		<link rel="apple-touch-icon" href="<?php echo SCRICH_URL ?>assets/apple-touch-icon.png">
+		<link rel="apple-touch-icon-precomposed" href="<?php echo SCRICH_URL ?>assets/apple-touch-icon-57x57-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" sizes="72x72" href="<?php echo SCRICH_URL ?>assets/apple-touch-icon-72x72-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="<?php echo SCRICH_URL ?>assets/apple-touch-icon-114x114-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" sizes="144x144" href="<?php echo SCRICH_URL ?>assets/apple-touch-icon-144x144-precomposed.png">
 		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no;">
 		<style><?php if ($cur_img): ?>#save{display:none;}<?php else: ?>#buttons button,#about{display:none;}<?php endif; ?></style>
 	</head>
