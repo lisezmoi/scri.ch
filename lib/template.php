@@ -39,6 +39,7 @@ CONTACT
 		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="<?php echo SCRICH_URL ?>assets/apple-touch-icon-114x114-precomposed.png">
 		<link rel="apple-touch-icon-precomposed" sizes="144x144" href="<?php echo SCRICH_URL ?>assets/apple-touch-icon-144x144-precomposed.png">
 		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no;">
+		<meta name="apple-mobile-web-app-capable" content="yes">
 		<style><?php if ($cur_img): ?>#save{display:none;}<?php else: ?>#buttons button,#about{display:none;}<?php endif; ?></style>
 	</head>
 	<body>
