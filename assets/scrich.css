@@ -32,10 +32,10 @@ button {
   clear:both;
   display:block;
   width:90px;
-  height:46px; /* (= line-height + padding + border) */
+  height:46px; /* (= height (33px) + padding + border) */
   margin:0;
   padding:6px 8px;
-  font:28px/33px Arial, Helvetica, sans-serif;
+  font:28px Arial, Helvetica, sans-serif;
   letter-spacing:1px;
   color:#333;
   background:#ebebeb;
