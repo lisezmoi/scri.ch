@@ -1,29 +1,29 @@
 (function(w, d){
 
-  var started   = false,
-      gid       = function(id){return document.getElementById(id);},
-      canv      = gid('drawing'),
-      bsave     = gid('save'),
-      bnew      = gid('new'),
-      img       = gid('img'),
-      form      = gid('form'),
-      ndrawing     = gid('new_drawing'),
-      settings  = gid('settings'),
-      about     = gid('about'),
-      minWidth  = 0,
-      minHeight = 0,
-      drew      = false,
-      ctx       = null,
-      copyCanv  = null,
-      copyCtx  = null,
-      canvMargin = null,
-      canvBackground = null,
-      canvForeground = null,
-      canvWidth = null,
-      canvHeight = null,
-      canvClassList = [],
-      canvLeft = 0,
-      canvTop = 0;
+  var gid = function(id){return d.getElementById(id);};
+  var canv = gid('drawing');
+  var bsave = gid('save');
+  var bnew = gid('new');
+  var img = gid('img');
+  var form = gid('form');
+  var ndrawing = gid('new_drawing');
+  var settings = gid('settings');
+  var about = gid('about');
+  var minWidth = 0;
+  var minHeight = 0;
+  var drew = false;
+  var ctx = null;
+  var copyCanv = null;
+  var copyCtx = null;
+  var canvMargin = null;
+  var canvBackground = null;
+  var canvForeground = null;
+  var canvWidth = null;
+  var canvHeight = null;
+  var canvClassList = [];
+  var canvLeft = 0;
+  var canvTop = 0;
+  var pxRatio = w.devicePixelRatio || 1;
 
   if (!canv.getContext) {
     w.alert('Your browser does not support canvas, you need to update it before using scri.ch.');
@@ -79,6 +79,12 @@
     ctx.drawImage(copyCanv, 0, 0);
   }
 
+  function mousemove(e) {
+    e.preventDefault();
+    var c = getCoords(e);
+    drawLine(c.x, c.y);
+  }
+
   function startDraw(e) {
     var c = getCoords(e);
     drawPoint(c.x, c.y); // Draw a point on click
@@ -89,14 +95,14 @@
 
     showBtns();
 
-    w.addEventListener('mousemove', ev_mousemove, false);
-    canv.addEventListener('touchmove', ev_mousemove, false);
+    w.addEventListener('mousemove', mousemove, false);
+    canv.addEventListener('touchmove', mousemove, false);
   }
 
   function endDraw() {
     ctx.stroke();
-    w.removeEventListener('mousemove', ev_mousemove, false);
-    canv.removeEventListener('touchmove', ev_mousemove, false);
+    w.removeEventListener('mousemove', mousemove, false);
+    canv.removeEventListener('touchmove', mousemove, false);
   }
 
   function drawPoint(x, y) {
@@ -125,12 +131,6 @@
     }
   }
 
-  function ev_mousemove(e) {
-    e.preventDefault();
-    var c = getCoords(e);
-    drawLine(c.x, c.y);
-  }
-
   function getCoords(e) {
     return {
       x: ((e.touches)? e.touches[0].pageX : e.pageX) - canvMargin - canvLeft,
@@ -145,6 +145,29 @@
     if (height > minHeight) {
       minHeight = height;
     }
+  }
+
+  function helpTimer() {
+    var baseTitle = d.title;
+    var nbsp = '\u00a0';
+    var pen = '\u270e';
+    var left = true;
+    var timer;
+
+    function loop(){
+      d.title = 'Draw! ' + (left? '':nbsp) + pen + (left? nbsp:'');
+      left = !left;
+      timer = w.setTimeout(loop, 300);
+    }
+
+    timer = w.setTimeout(loop, 4000);
+
+    return {
+      stop: function(){
+        w.clearTimeout(timer);
+        d.title = baseTitle;
+      }
+    };
   }
 
   function start() {
@@ -173,12 +196,38 @@
     }, false);
     resizeCanvas();
 
-    d.body.addEventListener('touchmove', function(e){ e.preventDefault(); }, false);
-    canv.addEventListener('mousedown', function(e){ if (e.button === 0) startDraw(e); }, true);
-    canv.addEventListener('touchstart', function(e){ e.preventDefault(); startDraw(e); }, false);
+    // Help
+    var help = helpTimer();
+
+    // Disable the touchmove event
+    d.body.addEventListener('touchmove', function(e){
+      e.preventDefault();
+    }, false);
+
+    // Down
+    canv.addEventListener('mousedown', function(e){
+      if (e.button === 0) {
+        startDraw(e);
+        if (help) {
+          help.stop();
+          help = null;
+        }
+      }
+    }, true);
+    canv.addEventListener('touchstart', function(e){
+      e.preventDefault();
+      startDraw(e);
+      if (help) {
+        help.stop();
+        help = null;
+      }
+    }, false);
+
+    // Up
     w.addEventListener('mouseup', endDraw, false);
     canv.addEventListener('touchend', endDraw, false);
 
+    // Save
     bsave.onclick = function() {
       var canvCurrentWidth = canv.width,
           canvCurrentHeight = canv.height;
@@ -191,13 +240,14 @@
       resizeCanvas(canvCurrentWidth, canvCurrentHeight);
     };
 
+    // New
     bnew.onclick = function() {
       w.location = w.SCRICH_URL;
     };
   }
 
   var loadImg = w.loadImg = function(src, callback) {
-    var cImg = new Image();
+    var cImg = new w.Image();
     cImg.onload = function() {
       canv.width = minWidth = cImg.width;
       canv.height = minHeight = cImg.height;
@@ -222,4 +272,4 @@
     start();
   }
 
-})(window, document);
+})(this, this.document);
