@@ -170,7 +170,7 @@
     };
   }
 
-  function start() {
+  function start(help) {
 
     // Margin parameter
     if (canvMargin > 0) {
@@ -195,9 +195,6 @@
       resizeCanvas();
     }, false);
     resizeCanvas();
-
-    // Help
-    var help = helpTimer();
 
     // Disable the touchmove event
     d.body.addEventListener('touchmove', function(e){
@@ -269,7 +266,7 @@
   if (img) {
     loadImg(img.src, start);
   } else {
-    start();
+    start(helpTimer());
   }
 
 })(this, this.document);
