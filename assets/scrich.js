@@ -105,6 +105,21 @@
     canv.removeEventListener('touchmove', mousemove, false);
   }
 
+  function updateMinDims(width, height) {
+    if (width > canv.width) {
+      width = canv.width;
+    }
+    if (height > canv.height) {
+      height = canv.height;
+    }
+    if (width > minWidth) {
+      minWidth = width;
+    }
+    if (height > minHeight) {
+      minHeight = height;
+    }
+  }
+
   function drawPoint(x, y) {
     updateMinDims(x+1, y+1);
     ctx.fillStyle = canvForeground;
@@ -136,15 +151,6 @@
       x: ((e.touches)? e.touches[0].pageX : e.pageX) - canvMargin - canvLeft,
       y: ((e.touches)? e.touches[0].pageY : e.pageY) - canvMargin - canvTop
     };
-  }
-
-  function updateMinDims(width, height) {
-    if (width > minWidth) {
-      minWidth = width;
-    }
-    if (height > minHeight) {
-      minHeight = height;
-    }
   }
 
   function helpTimer() {
