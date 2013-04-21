@@ -56,7 +56,8 @@ e.g. http://scri.ch/baf.png?crop
 ## Installation
 
  * [Download scri.ch](https://github.com/bpierre/scri.ch/zipball/master)
- * Extract the package on your server
+ * Extract the package
+ * Install the dependencies with [Composer](http://getcomposer.org/) `$ composer install`
  * /tmp and /drawings directories must be writable by the webserver
  * Create a new database
  * Execute `schema.sql` on the database

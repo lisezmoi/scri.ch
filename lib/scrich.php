@@ -1,6 +1,9 @@
 <?php
-define('SCRICH_VERSION', '1.2');
+use Evenement\EventEmitter;
+
+define('SCRICH_VERSION', '2.0.0-dev');
 define('SCRICH_ROOT', realpath(__DIR__ . '/..'));
+define('SCRICH_PLUGINS', realpath(SCRICH_ROOT . '/plugins'));
 
 require_once SCRICH_ROOT.'/config.php';
 require_once SCRICH_ROOT.'/lib/drawing-model.php';
@@ -14,8 +17,23 @@ function serve_image($img) {
   exit;
 }
 
-function scrich_init() {
+function load_plugins($composer_autoloader, &$scrich_events) {
+  $automap = $composer_autoloader->getClassMap();
+  $plugins_loaded = array();
+  foreach ($automap as $classname => $filename) {
+    if (strpos($filename, SCRICH_PLUGINS) !== FALSE) {
+      $plugins_loaded[] = new $classname($scrich_events);
+    }
+  }
+  $scrich_events->emit('plugins.load', array($plugins_loaded));
+  return $plugins_loaded;
+}
+
+function scrich_init($config, $composer_autoloader) {
   global $cur_img, $title;
+
+  $scrich_events = new EventEmitter();
+  $plugins_loaded = load_plugins($composer_autoloader, $scrich_events);
 
   if (isset($_POST['new_drawing'])) {
     $img = $_POST['new_drawing'];
@@ -26,6 +44,9 @@ function scrich_init() {
 
     $drawing_m = new DrawingModel();
     $short_id = $drawing_m->save($img, NULL, $settings);
+
+    $scrich_events->emit('drawing.new', array($short_id, $settings));
+
     header('Location: '.SCRICH_URL.$short_id);
 
   } else {

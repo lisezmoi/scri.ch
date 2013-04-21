@@ -1,0 +1,27 @@
+{
+    "name": "lisezmoi/scri.ch",
+    "description": "scri.ch is a minimal web app that lets you draw, share, and fork existing drawings.",
+    "authors": [
+        {
+            "name": "Raphaël Bastide",
+            "email": "bonjour@raphaelbastide.com",
+            "homepage": "http://www.raphaelbastide.com/",
+            "role": "Designer"
+        },
+        {
+            "name": "Pierre Bertet",
+            "email": "bonjour@pierrebertet.net",
+            "homepage": "http://pierrebertet.net/",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+      "php": ">=5.3.0",
+      "evenement/evenement": "1.0.*"
+    },
+    "autoload": {
+      "classmap": [
+        "plugins"
+      ]
+    }
+}
