@@ -42,23 +42,19 @@ The margin around the canvas, in pixels. Eg. `http://scri.ch/?margin=100`
 
 To get the image corresponding to a scri.ch drawing, just append .png to the URL. The drawing will be centered and framed.
 
-Example: <http://scri.ch/baf.png>
+Example: http://scri.ch/baf.png
 
 ### Zoom
 
 To get a zoomed version of an image, add the needed level of zoom with `-2x` where “2” is the level you want, up to 4.
 
-Examples:
-
-<http://scri.ch/baf-2x.png>
-<http://scri.ch/baf-3x.png>
-<http://scri.ch/baf-4x.png>
+Example: http://scri.ch/baf-2x.png
 
 ### Raw image
 
 To get the raw, not cropped version of the image, add `-raw`.
 
-Example: <http://scri.ch/baf-raw.png>
+Example: http://scri.ch/baf-raw.png
 
 ## Requirements
  * PHP 5.3
