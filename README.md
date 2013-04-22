@@ -38,7 +38,7 @@ The canvas size, in pixels. Syntax:
 
 The margin around the canvas, in pixels. Eg. `http://scri.ch/?margin=100`
 
-## Images URLs
+## Image URLs
 
 To get the image corresponding to a scri.ch drawing, just append .png to the URL. The drawing will be centered and framed.
 
@@ -57,6 +57,7 @@ To get the raw, not cropped version of the image, add `-raw`.
 Example: http://scri.ch/baf-raw.png
 
 ## Requirements
+
  * PHP 5.3
  * MySQL 5.x
  * [Imagick](http://php.net/imagick) PHP Extension
