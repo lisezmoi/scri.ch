@@ -29,6 +29,16 @@ function load_plugins($composer_autoloader, &$scrich_events) {
   return $plugins_loaded;
 }
 
+function crop_image($image_name, $dest_image_name, $background = 'white', $margin = 20) {
+  if (file_exists($dest_image_name)) return $dest_image_name;
+  $im = new Imagick($image_name);
+  $im->trimImage(0);
+  $im->setImageBackgroundColor($background);
+  $im->borderImage($background, $margin, $margin);
+  $im->writeImage($dest_image_name);
+  return $dest_image_name;
+}
+
 function scrich_init($config, $composer_autoloader) {
   global $cur_img, $title;
 
@@ -59,28 +69,37 @@ function scrich_init($config, $composer_autoloader) {
       $request = ltrim($_GET['r'], '/');
 
       // Direct image
-      if (preg_match('/^[a-z0-9]+\.png$/', $request) && file_exists(SCRICH_ROOT.'/drawings/'.$request)) {
+      $is_direct_image = preg_match('/^([a-z0-9]+)(\-raw)?\.png$/', $request, $direct_image_matches);
 
-        $image_name = $request;
+      if ($is_direct_image && file_exists(SCRICH_ROOT.'/drawings/'.$direct_image_matches[1].'.png')) {
 
-        // Crop image (if imagick is loaded)
-        if (isset($_GET['crop']) && extension_loaded('imagick')) {
-          $cropped_name = str_replace('.png', '-crop.png', $image_name);
-          if (!file_exists(SCRICH_ROOT.'/drawings/'.$cropped_name)) {
-            $im = new Imagick(SCRICH_ROOT.'/drawings/'.$image_name);
-            $im->trimImage(0);
-            $im->borderImage('transparent', 20, 20); // TODO: fetch the bg color in DB
-            $im->writeImage(SCRICH_ROOT.'/drawings/'.$cropped_name);
-          }
-          $image_name = $cropped_name;
+        $scrich_id = $direct_image_matches[1];
+        $image_name = $scrich_id.'.png';
+        $image_name_crop = $scrich_id.'-crop.png';
+        $image_path = SCRICH_ROOT.'/drawings/'.$image_name;
+        $image_crop_path = SCRICH_ROOT.'/drawings/'.$image_name_crop;
+        $is_raw = (count($direct_image_matches) === 3) && ($direct_image_matches[2] === '-raw');
+
+        // Get settings
+        $drawing_m = new DrawingModel();
+        $cur_drawing = $drawing_m->get($scrich_id);
+        $scrich_settings = unserialize($cur_drawing['settings']);
+
+        // Crop image (if imagick is loaded, and the image is not at a fixed size)
+        if (!$is_raw && extension_loaded('imagick') && !isset($scrich_settings['size'])) {
+          $img_background = isset($scrich_settings['background'])? $scrich_settings['background'] : 'white';
+          $image_path = crop_image($image_path, $image_crop_path, $img_background, 20);
         }
 
         // Serve image
-        serve_image('drawings/'.$image_name);
+        serve_image($image_path);
 
         // Serve 404.png (from the assets/ dir)
+      } elseif ($request === '404-raw.png') {
+        serve_image(SCRICH_ROOT.'/assets/404.png');
+
       } elseif ($request === '404.png') {
-        serve_image('assets/404.png');
+        serve_image(crop_image(SCRICH_ROOT.'/assets/404.png', SCRICH_ROOT.'/drawings/404-crop.png', 'white', 20));
 
       // Load an existing drawing
       } else {

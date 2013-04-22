@@ -28,7 +28,7 @@
 			<input type="hidden" id="settings" name="settings" value="">
 		</form>
 <?php if ($cur_img): ?>
-		<img id="img" src="<?php echo SCRICH_URL.$cur_img ?>.png" /><?php endif; ?>
+		<img id="img" src="<?php echo SCRICH_URL.$cur_img ?>-raw.png" /><?php endif; ?>
 		<script>
 			var SCRICH_URL = '<?php echo SCRICH_URL ?>';
 			var SCRICH_SETTINGS = <?php echo $scrich_settings ?>;
