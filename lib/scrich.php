@@ -9,14 +9,6 @@ require_once SCRICH_ROOT.'/config.php';
 require_once SCRICH_ROOT.'/lib/drawing-model.php';
 require_once SCRICH_ROOT.'/lib/drawing-settings.php';
 
-// Send a PNG image and exit PHP
-function serve_image($img) {
-  header('Content-type: image/png');
-  header('Content-Length: ' . filesize($img));
-  readfile($img);
-  exit;
-}
-
 function load_plugins($composer_autoloader, &$scrich_events) {
   $automap = $composer_autoloader->getClassMap();
   $plugins_loaded = array();
@@ -29,6 +21,14 @@ function load_plugins($composer_autoloader, &$scrich_events) {
   return $plugins_loaded;
 }
 
+// Send a PNG image and exit PHP
+function serve_image($img) {
+  header('Content-type: image/png');
+  header('Content-Length: ' . filesize($img));
+  readfile($img);
+  exit;
+}
+
 function crop_image($image_name, $dest_image_name, $background = 'white', $margin = 20) {
   if (file_exists($dest_image_name)) return $dest_image_name;
   $im = new Imagick($image_name);
@@ -39,8 +39,45 @@ function crop_image($image_name, $dest_image_name, $background = 'white', $margi
   return $dest_image_name;
 }
 
+function zoom_image($image_name, $dest_image_name, $zoom_level) {
+  if (file_exists($dest_image_name)) return $dest_image_name;
+  $im = new Imagick($image_name);
+  $dimensions = $im->getImageGeometry();
+  $im->scaleImage($dimensions['width']*$zoom_level, $dimensions['height']*$zoom_level);
+  $im->writeImage($dest_image_name);
+  return $dest_image_name;
+}
+
+function handle_direct_image($scrich_id, $image_path, $mode, $settings = NULL) {
+
+  // Get settings
+  if ($settings === NULL) {
+    $drawing_m = new DrawingModel();
+    $cur_drawing = $drawing_m->get($scrich_id);
+    $settings = unserialize($cur_drawing['settings']);
+  }
+
+  // Crop image (if the image is not at a fixed size)
+  if ($mode !== 'raw' && !isset($settings['size'])) {
+    $img_background = isset($settings['background'])? $settings['background'] : 'white';
+    $image_path = crop_image($image_path, SCRICH_ROOT."/drawings/{$scrich_id}-crop.png", $img_background, 20);
+  }
+
+  // Zoom image
+  if (in_array($mode, array('2x', '3x', '4x'))) {
+    $image_path = zoom_image($image_path, SCRICH_ROOT."/drawings/{$scrich_id}-{$mode}.png", intval($mode, 10));
+  }
+
+  // Serve image
+  serve_image($image_path);
+}
+
 function scrich_init($config, $composer_autoloader) {
   global $cur_img, $title;
+
+  if (!extension_loaded('imagick')) {
+    die('Error: the PHP Imagick extension is required.');
+  }
 
   $scrich_events = new EventEmitter();
   $plugins_loaded = load_plugins($composer_autoloader, $scrich_events);
@@ -54,7 +91,6 @@ function scrich_init($config, $composer_autoloader) {
 
     $drawing_m = new DrawingModel();
     $short_id = $drawing_m->save($img, NULL, $settings);
-
     $scrich_events->emit('drawing.new', array($short_id, $settings));
 
     header('Location: '.SCRICH_URL.$short_id);
@@ -69,30 +105,28 @@ function scrich_init($config, $composer_autoloader) {
       $request = ltrim($_GET['r'], '/');
 
       // Direct image
-      $is_direct_image = preg_match('/^([a-z0-9]+)(\-raw)?\.png$/', $request, $direct_image_matches);
-
-      if ($is_direct_image && file_exists(SCRICH_ROOT.'/drawings/'.$direct_image_matches[1].'.png')) {
+      if (preg_match('/^([a-z0-9]+)(\-raw|\-[1234]x)?\.png$/', $request, $direct_image_matches)) {
 
         $scrich_id = $direct_image_matches[1];
-        $image_name = $scrich_id.'.png';
-        $image_name_crop = $scrich_id.'-crop.png';
-        $image_path = SCRICH_ROOT.'/drawings/'.$image_name;
-        $image_crop_path = SCRICH_ROOT.'/drawings/'.$image_name_crop;
-        $is_raw = (count($direct_image_matches) === 3) && ($direct_image_matches[2] === '-raw');
+        if ($scrich_id === '404' || file_exists(SCRICH_ROOT."/drawings/{$scrich_id}.png")) {
 
-        // Get settings
-        $drawing_m = new DrawingModel();
-        $cur_drawing = $drawing_m->get($scrich_id);
-        $scrich_settings = unserialize($cur_drawing['settings']);
+          $mode = 'crop';
+          if (count($direct_image_matches) === 3) {
+            $tmp_mode = substr($direct_image_matches[2], 1);
+            if (in_array($tmp_mode, array('raw', '2x', '3x', '4x'))) {
+              $mode = $tmp_mode;
+            }
+          }
 
-        // Crop image (if imagick is loaded, and the image is not at a fixed size)
-        if (!$is_raw && extension_loaded('imagick') && !isset($scrich_settings['size'])) {
-          $img_background = isset($scrich_settings['background'])? $scrich_settings['background'] : 'white';
-          $image_path = crop_image($image_path, $image_crop_path, $img_background, 20);
+          $image_path = SCRICH_ROOT."/drawings/{$scrich_id}.png";
+          $settings = NULL;
+          if ($scrich_id === '404') {
+            $image_path = SCRICH_ROOT.'/assets/404.png';
+            $settings = array();
+          }
+
+          handle_direct_image($scrich_id, $image_path, $mode, $settings);
         }
-
-        // Serve image
-        serve_image($image_path);
 
         // Serve 404.png (from the assets/ dir)
       } elseif ($request === '404-raw.png') {
