@@ -29,6 +29,15 @@ function serve_image($img) {
   exit;
 }
 
+function show_404(&$scrich_events) {
+  header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+  $cur_img = '404';
+  $scrich_settings = '{}';
+  $title = '404 Not Found';
+  include_once SCRICH_ROOT.'/lib/template.php';
+  die();
+}
+
 function crop_image($image_name, $dest_image_name, $background = 'white', $margin = 20) {
   if (file_exists($dest_image_name)) return $dest_image_name;
   $im = new Imagick($image_name);
@@ -126,6 +135,10 @@ function scrich_init($config, $composer_autoloader) {
           }
 
           handle_direct_image($scrich_id, $image_path, $mode, $settings);
+
+        // 404 on a .png URL
+        } else {
+          show_404($scrich_events);
         }
 
       // Load an existing drawing
@@ -137,10 +150,7 @@ function scrich_init($config, $composer_autoloader) {
 
         // 404
         if (!$cur_img) {
-          header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
-          $cur_img = '404';
-          $scrich_settings = '{}';
-          $title = '404 Not Found';
+          show_404($scrich_events);
         }
       }
     } else { // New drawing
