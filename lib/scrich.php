@@ -128,13 +128,6 @@ function scrich_init($config, $composer_autoloader) {
           handle_direct_image($scrich_id, $image_path, $mode, $settings);
         }
 
-        // Serve 404.png (from the assets/ dir)
-      } elseif ($request === '404-raw.png') {
-        serve_image(SCRICH_ROOT.'/assets/404.png');
-
-      } elseif ($request === '404.png') {
-        serve_image(crop_image(SCRICH_ROOT.'/assets/404.png', SCRICH_ROOT.'/drawings/404-crop.png', 'white', 20));
-
       // Load an existing drawing
       } else {
         $drawing_m = new DrawingModel();
