@@ -87,6 +87,13 @@ button:active {
   -ms-user-select:none;
   user-select:none;
 }
+#error {
+  position: absolute;
+  width: 400px;
+  margin: 200px 0 0 500px;
+  font-size: 18px;
+  line-height: 36px;
+}
 /* Mobile browsers (Opera Mobile, Safari iOS, Chrome Android) */
 @media only screen and (max-device-width:480px) {
   button {

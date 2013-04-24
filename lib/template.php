@@ -17,6 +17,9 @@
 <?php $scrich_events->emit('template.after-styles') ?>
 	</head>
 	<body>
+<?php if (isset($error_message)): ?>
+	<div id="error"><?php echo $error_message ?></div>
+<?php endif ?>
 		<canvas id="drawing"></canvas>
 		<div id="buttons">
 			<button id="new">New</button>

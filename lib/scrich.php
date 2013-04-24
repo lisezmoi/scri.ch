@@ -29,6 +29,15 @@ function serve_image($img) {
   exit;
 }
 
+function show_forbidden(&$scrich_events, $img, $message = '403 Forbidden') {
+  header($_SERVER['SERVER_PROTOCOL'].' 403 Forbidden');
+  $cur_img = $img;
+  $scrich_settings = '{}';
+  $title = $error_message = $message;
+  include_once SCRICH_ROOT.'/lib/template.php';
+  die();
+}
+
 function show_404(&$scrich_events) {
   header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
   $cur_img = '404';
@@ -51,13 +60,18 @@ function crop_image($image_name, $dest_image_name, $background = 'white', $margi
 function zoom_image($image_name, $dest_image_name, $zoom_level) {
   if (file_exists($dest_image_name)) return $dest_image_name;
   $im = new Imagick($image_name);
-  $dimensions = $im->getImageGeometry();
-  $im->scaleImage($dimensions['width']*$zoom_level, $dimensions['height']*$zoom_level);
+  extract($im->getImageGeometry()); // extracts $width and $height
+
+  // If the image resolution exceeds the limit
+  if (($width * $height * pow($zoom_level, 2)) > ZOOM_MAX_PIXELS) {
+    return FALSE;
+  }
+  $im->scaleImage($width * $zoom_level, $height * $zoom_level);
   $im->writeImage($dest_image_name);
   return $dest_image_name;
 }
 
-function handle_direct_image($scrich_id, $image_path, $mode, $settings = NULL) {
+function handle_direct_image(&$scrich_events, $scrich_id, $image_path, $mode, $settings = NULL) {
 
   // Get settings
   if ($settings === NULL) {
@@ -73,11 +87,16 @@ function handle_direct_image($scrich_id, $image_path, $mode, $settings = NULL) {
   }
 
   // Zoom image
-  if (in_array($mode, array('2x', '3x', '4x'))) {
+  if (preg_match('/^[1-9][0-9]*x$/', $mode)) {
     $image_path = zoom_image($image_path, SCRICH_ROOT."/drawings/{$scrich_id}-{$mode}.png", intval($mode, 10));
+
+    if ($image_path === FALSE) {
+      show_forbidden($scrich_events, 'error_too_much_pixels', 'The dimensions of the requested zoom level are exceeding the limitations. Sorry!');
+      return;
+    }
   }
 
-  // Serve image
+  // Show image
   serve_image($image_path);
 }
 
@@ -114,27 +133,28 @@ function scrich_init($config, $composer_autoloader) {
       $request = ltrim($_GET['r'], '/');
 
       // Direct image
-      if (preg_match('/^([a-z0-9]+)(\-raw|\-[1234]x)?\.png$/', $request, $direct_image_matches)) {
+      if (preg_match('/^([a-z0-9_]+)(\-raw|\-[1-9][0-9]*x)?\.png$/', $request, $direct_image_matches)) {
 
         $scrich_id = $direct_image_matches[1];
-        if ($scrich_id === '404' || file_exists(SCRICH_ROOT."/drawings/{$scrich_id}.png")) {
+        if ($scrich_id === '404' || $scrich_id === 'error_too_much_pixels' || file_exists(SCRICH_ROOT."/drawings/{$scrich_id}.png")) {
 
           $mode = 'crop';
           if (count($direct_image_matches) === 3) {
-            $tmp_mode = substr($direct_image_matches[2], 1);
-            if (in_array($tmp_mode, array('raw', '2x', '3x', '4x'))) {
-              $mode = $tmp_mode;
-            }
+            $mode = substr($direct_image_matches[2], 1);
           }
 
           $image_path = SCRICH_ROOT."/drawings/{$scrich_id}.png";
           $settings = NULL;
+
           if ($scrich_id === '404') {
             $image_path = SCRICH_ROOT.'/assets/404.png';
             $settings = array();
+          } else if ($scrich_id === 'error_too_much_pixels') {
+            $image_path = SCRICH_ROOT.'/assets/error-too-much-pixels.png';
+            $setting = array();
           }
 
-          handle_direct_image($scrich_id, $image_path, $mode, $settings);
+          handle_direct_image($scrich_events, $scrich_id, $image_path, $mode, $settings);
 
         // 404 on a .png URL
         } else {
