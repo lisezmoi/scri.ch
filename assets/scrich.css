@@ -11,6 +11,9 @@ body {
 canvas {
   display:block;
   margin:0 auto;
+  image-rendering:-moz-crisp-edges;
+  image-rendering:-webkit-optimize-contrast;
+  image-rendering:pixelated;
 }
 canvas.margin {
   position:absolute;
