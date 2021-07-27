@@ -49,10 +49,13 @@ function show_404(&$scrich_events) {
 
 function crop_image($image_name, $dest_image_name, $background = 'white', $margin = 20) {
   if (file_exists($dest_image_name)) return $dest_image_name;
-  $im = new Imagick($image_name);
-  $im->trimImage(0);
+  $im = new Imagick();
+  $im->readImage($image_name);
   $im->setImageBackgroundColor($background);
+  $im->mergeImageLayers(imagick::LAYERMETHOD_FLATTEN);
+  $im->trimImage(0);
   $im->borderImage($background, $margin, $margin);
+  $im->setImageFormat("png");
   $im->writeImage($dest_image_name);
   return $dest_image_name;
 }
