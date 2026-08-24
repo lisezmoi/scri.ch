@@ -24,7 +24,7 @@
 		<div id="buttons">
 			<button id="new">New</button>
 			<button id="save">Save</button>
-			<a href="http://about.scri.ch/" id="about" title="About scri.ch">?</a>
+			<a href="https://scri.ch/about" id="about" title="About scri.ch">?</a>
 		</div>
 		<form action="" method="post" id="form">
 			<input type="hidden" id="new_drawing" name="new_drawing" value="">
