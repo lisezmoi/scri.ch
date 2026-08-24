@@ -13,7 +13,7 @@ function load_plugins($composer_autoloader, &$scrich_events) {
   $automap = $composer_autoloader->getClassMap();
   $plugins_loaded = array();
   foreach ($automap as $classname => $filename) {
-    if (strpos($filename, SCRICH_PLUGINS) !== FALSE) {
+    if (strpos(realpath($filename), SCRICH_PLUGINS) !== FALSE) {
       $plugins_loaded[] = new $classname($scrich_events);
     }
   }
