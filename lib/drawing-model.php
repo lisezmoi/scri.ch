@@ -9,7 +9,7 @@ class DrawingModel
 
   function __construct() {
     $this->pdo = $this->get_pdo();
-    $this->reserved_short_ids = array('404','admin','gallery','feed','live');
+    $this->reserved_short_ids = array('404','admin','gallery','feed','live','about');
   }
 
   /* Returns a drawing */
