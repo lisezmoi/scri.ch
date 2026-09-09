@@ -53,7 +53,8 @@ SQL/media backup and the repair manifest so normalized images can be traced to t
 ### Run the importer
 
 Use an uncompressed SQL dump containing the `scrich` database, a `USE scrich;` statement, and standard
-`INSERT INTO` statements without column lists. Replace the example paths below. Neither output
+`INSERT INTO` statements without column lists. Inserts may span multiple lines; LF and CRLF
+line endings are supported. Do not normalize whitespace inside quoted settings values. Replace the example paths below. Neither output
 directory may already exist.
 
 ```sh
