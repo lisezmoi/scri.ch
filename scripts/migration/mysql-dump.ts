@@ -74,12 +74,17 @@ function parseValues(source: string): SqlValue[][] {
   return rows;
 }
 
-export function parseScrichDump(sql: string): LegacyDrawingRow[] {
-  const databaseMarker = "USE `scrich`;";
-  const databaseStart = sql.indexOf(databaseMarker);
-  if (databaseStart < 0) throw new Error("The dump does not contain the scrich database");
-  const nextDatabase = sql.indexOf("-- Current Database:", databaseStart + databaseMarker.length);
-  const section = sql.slice(databaseStart, nextDatabase < 0 ? undefined : nextDatabase);
+export function parseScrichDump(sql: string, assumeScrich = false): LegacyDrawingRow[] {
+  const markers = [...sql.matchAll(/^\s*USE\s+`?([a-zA-Z0-9_]+)`?\s*;/gm)];
+  const selected = markers.findIndex((marker) => marker[1] === "scrich");
+  if (selected < 0 && (markers.length > 0 || !assumeScrich)) {
+    throw new Error(
+      "The dump does not contain the scrich database; for a single-database dump without USE, pass --database scrich",
+    );
+  }
+  const section = selected < 0
+    ? sql
+    : sql.slice(markers[selected]!.index, markers[selected + 1]?.index);
   const prefix = "INSERT INTO `drawings` VALUES ";
   const rows: LegacyDrawingRow[] = [];
   let searchOffset = 0;

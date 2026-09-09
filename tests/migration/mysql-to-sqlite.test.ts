@@ -122,3 +122,52 @@ INSERT INTO \`drawings\` VALUES (1,'b',${parent},NULL,'2020-01-01 00:00:00'),(2,
     }
   });
 }
+
+for (const mode of ["invalid", "missing", "orphan", "derivative-only"] as const) {
+  test(`does not reuse historical URLs from ${mode} media`, async () => {
+    const root = mkdtempSync("/tmp/scrich-allocator-migration-");
+    roots.push(root);
+    const mediaDir = join(root, "legacy");
+    mkdirSync(mediaDir);
+    const png = await sharp({ create: { width: 2, height: 2, channels: 4, background: "red" } })
+      .png().toBuffer();
+    writeFileSync(join(mediaDir, "1.png"), png);
+    const filename = mode === "derivative-only" ? "2-2x.png" : "2.png";
+    if (mode !== "missing") writeFileSync(join(mediaDir, filename), "original rejected bytes");
+    const source = join(root, "dump.sql");
+    writeFileSync(
+      source,
+      `INSERT INTO \`drawings\` VALUES (100,'1',NULL,NULL,'2020-01-01 00:00:00')${
+        mode === "invalid" || mode === "missing" ? ",(101,'2',NULL,NULL,'2020-01-01 00:00:00')" : ""
+      };\n`,
+    );
+    const options = {
+      source,
+      mediaDir,
+      outputDir: join(root, "output"),
+      rejectedDir: join(root, "rejected"),
+      database: "scrich" as const,
+    };
+    const report = await migrate(options);
+    expect(report.nextDrawingValue).toBe(3);
+    const db = new DrawingDatabase(join(options.outputDir, "scrich.sqlite"), false);
+    try {
+      const created = db.create({}, "2020-01-02T00:00:00Z", () => false, () => {});
+      expect(created.shortId).toBe("3");
+      expect(db.find("2")).toBeNull();
+    } finally {
+      db.close();
+    }
+    const manifest = readFileSync(report.rejectedManifest, "utf8").trim().split("\n").map(line =>
+      JSON.parse(line)
+    );
+    const rejected = manifest.find(entry => entry.shortId === "2");
+    expect(rejected).toBeDefined();
+    if (mode !== "missing") {
+      expect(rejected.files).toHaveLength(1);
+      expect(rejected.files[0].sha256).toHaveLength(64);
+      expect(readFileSync(rejected.files[0].copiedPath, "utf8")).toBe("original rejected bytes");
+      expect(readFileSync(join(mediaDir, filename), "utf8")).toBe("original rejected bytes");
+    }
+  });
+}

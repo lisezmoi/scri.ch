@@ -17,7 +17,8 @@
     "format:check": "dprint check",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
-    "check": "bun run format:check && bun run typecheck && bun test"
+    "check": "bun run format:check && bun run typecheck && bun test",
+    "migrate:repair-pngs": "bun scripts/migration/repair-pngs.ts"
   },
   "dependencies": {
     "sharp": "0.35.4"

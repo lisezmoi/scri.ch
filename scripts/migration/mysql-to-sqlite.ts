@@ -18,6 +18,7 @@ import { parseLegacySettings } from "./php-serialize";
 
 export interface MigrationOptions {
   source: string;
+  database?: "scrich";
   mediaDir: string;
   outputDir: string;
   rejectedDir: string;
@@ -30,6 +31,7 @@ interface RejectedEntry {
   bytes?: number;
   sha256?: string;
   copiedPaths?: string[];
+  files?: { name: string; bytes: number; sha256: string; copiedPath: string; }[];
 }
 
 export interface MigrationReport {
@@ -43,6 +45,7 @@ export interface MigrationReport {
   orphanMedia: number;
   reserved: number;
   rejectedManifest: string;
+  nextDrawingValue: number;
 }
 
 function argumentsFrom(argv: string[]): MigrationOptions {
@@ -60,7 +63,12 @@ function argumentsFrom(argv: string[]): MigrationOptions {
     if (!value) throw new Error(`Missing ${key}`);
     return resolve(value);
   };
+  const database = values.get("--database");
+  if (database !== undefined && database !== "scrich") {
+    throw new Error("--database must be scrich (for a single-database dump without USE)");
+  }
   return {
+    ...(database === "scrich" ? { database } as const : {}),
     source: required("--source"),
     mediaDir: required("--media-dir"),
     outputDir: required("--output-dir"),
@@ -81,7 +89,7 @@ function groupRows(rows: LegacyDrawingRow[]): Map<string, LegacyDrawingRow[]> {
 function relatedMedia(mediaNames: string[]): Map<string, string[]> {
   const related = new Map<string, string[]>();
   for (const name of mediaNames) {
-    const match = /^([0-9a-z]+)-(?:crop|[0-9]+x)\.png$/.exec(name);
+    const match = /^([0-9a-z]+)-(?:raw|crop|cropped|[0-9]+x)\.png$/.exec(name);
     if (!match) continue;
     const entries = related.get(match[1]!) ?? [];
     entries.push(name);
@@ -134,7 +142,7 @@ export async function migrate(options: MigrationOptions): Promise<MigrationRepor
     throw new Error(`Media directory does not exist: ${options.mediaDir}`);
   }
 
-  const rows = parseScrichDump(readFileSync(options.source, "utf8"));
+  const rows = parseScrichDump(readFileSync(options.source, "utf8"), options.database === "scrich");
   const groups = groupRows(rows);
   const canonicalIds = new Map<number, number>();
   for (const group of groups.values()) {
@@ -146,6 +154,16 @@ export async function migrate(options: MigrationOptions): Promise<MigrationRepor
     mediaNames.flatMap((name) => /^([0-9a-z]+)\.png$/.exec(name)?.[1] ?? []),
   );
   const related = relatedMedia(mediaNames);
+  // Reserve every historical URL, including records/media excluded from the import.
+  let maximumValue = 0;
+  for (const shortId of new Set([...groups.keys(), ...rawIds, ...related.keys()])) {
+    maximumValue = Math.max(maximumValue, decodeShortId(shortId));
+  }
+  const nextDrawingValue = maximumValue + 1;
+  if (!Number.isSafeInteger(nextDrawingValue)) {
+    throw new Error("Historical drawing IDs exhaust the allocator");
+  }
+  const orphanIds = [...new Set([...rawIds, ...related.keys()])].filter((id) => !groups.has(id));
   const accepted: Omit<DrawingRecord, "visibility">[] = [];
   const rejected: RejectedEntry[] = [];
   let duplicateGroupsCollapsed = 0;
@@ -168,6 +186,7 @@ export async function migrate(options: MigrationOptions): Promise<MigrationRepor
       }
       if (shortId === "404") {
         reserved++;
+        rejected.push({ shortId, legacyRowIds: group.map((row) => row.id), reason: "reserved_id" });
         continue;
       }
       decodeShortId(shortId);
@@ -226,6 +245,12 @@ export async function migrate(options: MigrationOptions): Promise<MigrationRepor
     }
   }
 
+  for (const shortId of orphanIds) {
+    rejected.push({ shortId, legacyRowIds: [], reason: "orphan_media" });
+  }
+  mkdirSync(options.rejectedDir, { recursive: true, mode: 0o700 });
+  mkdirSync(join(options.rejectedDir, "orphan"));
+  mkdirSync(join(options.rejectedDir, "reserved"));
   mkdirSync(join(options.outputDir, "drawings"), { recursive: true });
   mkdirSync(join(options.outputDir, "cache", "v3"), { recursive: true });
   mkdirSync(join(options.outputDir, "tmp"), { recursive: true });
@@ -237,7 +262,7 @@ export async function migrate(options: MigrationOptions): Promise<MigrationRepor
   try {
     database.raw.transaction(() => {
       for (const drawing of accepted) database.insertImported(drawing);
-      database.seedAllocator(database.nextValueFromExisting());
+      database.seedAllocator(nextDrawingValue);
     }).immediate();
   } finally {
     database.close();
@@ -251,21 +276,34 @@ export async function migrate(options: MigrationOptions): Promise<MigrationRepor
 
   for (const entry of rejected) {
     const copiedPaths: string[] = [];
+    entry.files = [];
+    const archive = (name: string, directory: string) => {
+      const source = join(options.mediaDir, name);
+      const destination = join(options.rejectedDir, directory, name);
+      copyFileSync(source, destination);
+      copiedPaths.push(destination);
+      entry.files!.push({
+        name,
+        bytes: statSync(source).size,
+        sha256: sha256(source),
+        copiedPath: destination,
+      });
+    };
     const originalName = `${entry.shortId}.png`;
     if (existsSync(join(options.mediaDir, originalName))) {
-      const destination = join(options.rejectedDir, "invalid-png", originalName);
-      copyFileSync(join(options.mediaDir, originalName), destination);
-      copiedPaths.push(destination);
+      archive(
+        originalName,
+        entry.reason === "orphan_media"
+          ? "orphan"
+          : entry.reason === "reserved_id"
+          ? "reserved"
+          : "invalid-png",
+      );
     }
-    for (const name of related.get(entry.shortId) ?? []) {
-      const destination = join(options.rejectedDir, "related", name);
-      copyFileSync(join(options.mediaDir, name), destination);
-      copiedPaths.push(destination);
-    }
+    for (const name of related.get(entry.shortId) ?? []) archive(name, "related");
     if (copiedPaths.length) entry.copiedPaths = copiedPaths;
   }
 
-  const orphanIds = [...rawIds].filter((shortId) => !groups.has(shortId));
   const manifestPath = join(options.rejectedDir, "manifest.jsonl");
   writeFileSync(manifestPath, rejected.map((entry) => JSON.stringify(entry)).join("\n") + "\n");
   const report: MigrationReport = {
@@ -279,6 +317,7 @@ export async function migrate(options: MigrationOptions): Promise<MigrationRepor
     orphanMedia: orphanIds.length,
     reserved,
     rejectedManifest: manifestPath,
+    nextDrawingValue,
   };
   writeFileSync(join(options.rejectedDir, "report.json"), `${JSON.stringify(report, null, 2)}\n`);
   return report;
