@@ -21,6 +21,28 @@ export function renderDrawingPage(
   error?: { status: number; message: string; },
 ): string {
   const title = error ? `${escapeHtml(error.message)} | ` : "";
+  const pageUrl = `${config.publicOrigin}/${shortId ?? ""}`;
+  const shareTitle = shortId ? `scri.ch / ${shortId}` : "scri.ch";
+  const imageUrl = `${config.publicOrigin}/${shortId}.png`;
+  const sharing = error ? "" : `
+    <link rel="canonical" href="${escapeHtml(pageUrl)}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="scri.ch">
+    <meta property="og:title" content="${escapeHtml(shareTitle)}">
+    <meta property="og:description" content="scri.ch is a website that lets you draw.">
+    <meta property="og:url" content="${escapeHtml(pageUrl)}">
+    <meta name="twitter:card" content="${shortId ? "summary_large_image" : "summary"}">
+    <meta name="twitter:title" content="${escapeHtml(shareTitle)}">
+    <meta name="twitter:description" content="scri.ch is a website that lets you draw.">
+    ${
+    shortId
+      ? `<meta property="og:image" content="${escapeHtml(imageUrl)}">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:alt" content="Drawing /${escapeHtml(shortId)} on scri.ch">
+    <meta name="twitter:image" content="${escapeHtml(imageUrl)}">
+    <meta name="twitter:image:alt" content="Drawing /${escapeHtml(shortId)} on scri.ch">`
+      : ""
+  }`;
   const style = shortId
     ? "#save{display:none;}"
     : "#buttons button,#about{display:none;}";
@@ -40,6 +62,7 @@ scri.ch is a hackable drawing tool
     <meta charset="utf-8">
     <title>${title}scri.ch</title>
     <meta name="description" content="scri.ch is a website that lets you draw.">
+    ${sharing}
     <link rel="stylesheet" href="${escapeHtml(config.clientAssets["scrich.css"])}">
     <link rel="icon" type="image/png" href="/assets/favicon.png">
     <link rel="apple-touch-icon-precomposed" href="/assets/apple-touch-icon-57x57-precomposed.png">

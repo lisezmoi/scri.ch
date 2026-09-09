@@ -310,3 +310,34 @@ test("records immediate parents and rejects invalid parents without files or all
   const missing = await (await app.fetch(new Request("https://scri.ch/absent"))).text();
   expect(missing).toContain("name=\"parent\" value=\"\"");
 });
+
+test("sharing metadata exposes a fetchable drawing PNG without JavaScript and omits hidden/error previews", async () => {
+  const { app } = appWithData();
+  const home = await (await app.fetch(new Request("https://untrusted.example/?background=ddd")))
+    .text();
+  expect(home).toContain("<meta property=\"og:url\" content=\"https://scri.ch/\">");
+  expect(home).toContain("<meta name=\"twitter:card\" content=\"summary\">");
+  expect(home).not.toContain("property=\"og:image\"");
+  const saved = await postPng(app);
+  const path = saved.headers.get("location")!;
+  const page = await (await app.fetch(new Request(`https://untrusted.example${path}?anything=1`)))
+    .text();
+  const imageUrl = `https://scri.ch${path}.png`;
+  expect(page).toContain(`<meta property="og:image" content="${imageUrl}">`);
+  expect(page).toContain(`<meta name="twitter:image" content="${imageUrl}">`);
+  expect(page).toContain("<meta name=\"twitter:card\" content=\"summary_large_image\">");
+  expect(page).toContain(`<link rel="canonical" href="https://scri.ch${path}">`);
+  expect(page).not.toContain("untrusted.example");
+  const preview = await app.fetch(new Request(imageUrl));
+  expect(preview.status).toBe(200);
+  expect((await sharp(await preview.arrayBuffer()).metadata()).format).toBe("png");
+  app.database.setVisibility(path.slice(1), "hidden");
+  for (const hiddenPath of [path, "/missing"]) {
+    const response = await app.fetch(new Request(`https://scri.ch${hiddenPath}`));
+    expect(response.status).toBe(404);
+    const body = await response.text();
+    expect(body).not.toContain("property=\"og:");
+    expect(body).not.toContain("name=\"twitter:");
+    expect(body).not.toContain("rel=\"canonical\"");
+  }
+});
