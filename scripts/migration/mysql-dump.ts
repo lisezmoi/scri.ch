@@ -8,6 +8,29 @@ export interface LegacyDrawingRow {
   createdAt: string;
 }
 
+const SQL_ESCAPES: Record<string, string> = {
+  "0": "\0",
+  b: "\b",
+  n: "\n",
+  r: "\r",
+  t: "\t",
+  Z: "\x1a",
+};
+
+// MySQL dump strings use backslash escapes or doubled quotes.
+// Share this rule between statement boundaries and drawing field values.
+function quotedEnd(source: string, start: number): number {
+  const quote = source[start];
+  for (let offset = start + 1; offset < source.length; offset++) {
+    if (source[offset] === "\\") offset++;
+    else if (source[offset] === quote) {
+      if (source[offset + 1] === quote) offset++;
+      else return offset + 1;
+    }
+  }
+  throw new Error("Unterminated SQL string");
+}
+
 function parseValues(source: string): SqlValue[][] {
   const rows: SqlValue[][] = [];
   let offset = 0;
@@ -28,40 +51,14 @@ function parseValues(source: string): SqlValue[][] {
       return null;
     }
     if (source[offset] === "'") {
-      offset++;
-      let result = "";
-      while (offset < source.length) {
-        if (source[offset] === "'") {
-          if (source[offset + 1] === "'") {
-            result += "'";
-            offset += 2;
-            continue;
-          }
-          offset++;
-          return result;
-        }
-        if (source[offset] === "\\") {
-          offset++;
-          const escaped = source[offset++];
-          if (escaped === undefined) throw new Error("Truncated SQL escape");
-          result += escaped === "0"
-            ? "\0"
-            : escaped === "b"
-            ? "\b"
-            : escaped === "n"
-            ? "\n"
-            : escaped === "r"
-            ? "\r"
-            : escaped === "t"
-            ? "\t"
-            : escaped === "Z"
-            ? "\x1a"
-            : escaped;
-        } else {
-          result += source[offset++];
-        }
-      }
-      throw new Error("Unterminated SQL string");
+      const end = quotedEnd(source, offset);
+      const quoted = source.slice(offset + 1, end - 1);
+      offset = end;
+      return quoted.replace(
+        /\\([\s\S])|''/g,
+        (_, escaped: string | undefined) =>
+          escaped === undefined ? "'" : (SQL_ESCAPES[escaped] ?? escaped),
+      );
     }
     const start = offset;
     while (/[0-9-]/.test(source[offset] ?? "")) offset++;
@@ -94,20 +91,12 @@ function parseValues(source: string): SqlValue[][] {
 // Split only outside quoted strings. Comments and line breaks must not alter stored values.
 function* sqlStatements(sql: string): Generator<string> {
   let statement = "";
-  let quote: string | undefined;
   for (let i = 0; i < sql.length; i++) {
     const character = sql[i]!;
-    if (quote) {
-      statement += character;
-      if (character === "\\") {
-        if (i + 1 < sql.length) statement += sql[++i];
-      } else if (character === quote) {
-        if (sql[i + 1] === quote) statement += sql[++i];
-        else quote = undefined;
-      }
-    } else if (character === "'" || character === "\"" || character === "`") {
-      quote = character;
-      statement += character;
+    if (character === "'" || character === "\"" || character === "`") {
+      const end = quotedEnd(sql, i);
+      statement += sql.slice(i, end);
+      i = end - 1;
     } else if (character === "#" || (sql.startsWith("--", i) && /\s/.test(sql[i + 2] ?? ""))) {
       const end = sql.indexOf("\n", i);
       i = end < 0 ? sql.length : end;
@@ -122,7 +111,7 @@ function* sqlStatements(sql: string): Generator<string> {
       statement = "";
     } else statement += character;
   }
-  if (quote || statement.trim()) throw new Error("Unterminated SQL statement");
+  if (statement.trim()) throw new Error("Unterminated SQL statement");
 }
 
 export function parseScrichDump(sql: string, assumeScrich = false): LegacyDrawingRow[] {
