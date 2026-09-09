@@ -2,125 +2,120 @@
 
 scri.ch is a minimal web app that lets you draw, share, and fork existing drawings.
 
-[Try it live](http://scri.ch/ "Try scri.ch")
-
-It is compatible with every modern browser, including mobile devices.
+[Try it on scri.ch](https://scri.ch/)
 
 ## How to use
 
-1. Draw on the main blank page
-2. Save using the "Save" button
-3. Copy the url and share it
-4. Continue your drawing or make a new one by clicking on the "New" button
+1. Draw on the blank page.
+2. Click **Save**.
+3. Copy the URL and share it.
+4. Keep drawing, or click **New** to start again.
 
 ## URL params
 
-You can define some parameters when starting a new drawing, e.g. `http://scri.ch/?background=ddd&foreground=666`
+You can choose colors, a canvas size, or a margin when starting a drawing. For example:
 
-### background
+```text
+https://scri.ch/?background=ddd&foreground=666
+```
 
-The background color in hexadecimal, without the `#`. Shortcuts allowed. e.g. `http://scri.ch/?background=ddd`
+- `background=ddd`: background color in hex, without `#`.
+- `foreground=666`: pen color in hex, without `#`.
+- `size=400`: a square canvas, 400 pixels wide and high.
+- `size=400x300`: a canvas with a specific width and height.
+- `size=400x` or `size=x300`: set just the width or height.
+- `margin=20`: space around the canvas. Ignored when a size is set.
 
-### foreground
-
-The foreground color in hexadecimal, without the `#`. Shortcuts allowed. e.g. `http://scri.ch/?foreground=ddd`
-
-### size
-
-The canvas size, in pixels. Syntax:
-
- * `?size=400`: define same width and height
- * `?size=400x`: define width only
- * `?size=x400`: define height only
- * `?size=400x300`: define both width and height
-
-### margin
-
-The margin around the canvas, in pixels. Eg. `http://scri.ch/?margin=100`
+Short and six-digit colors both work. See [all options](docs/drawing-options.md) for more details.
 
 ## Image URLs
 
-To get the image corresponding to a scri.ch drawing, just append .png to the URL. The drawing will be centered and framed.
+Add `.png` to a drawing URL to get a cropped image with a white background and a 20px border.
+If you chose a background color, it uses that color instead. If you set a canvas size, the image
+keeps that size without cropping or adding a border.
 
-Example: http://scri.ch/baf.png
+You can also use:
 
-### Zoom
+- `-cropped.png` for a tight crop without a border.
+- `-raw.png` for the original canvas, including any transparency.
+- `-2x.png`, `-3x.png`, or `-4x.png` for a larger image.
 
-To get a zoomed version of an image, add the needed level of zoom with `-2x` where “2” is the level you want, up to 4.
-
-Example: http://scri.ch/baf-2x.png
-
-### Raw image
-
-To get the raw, not cropped version of the image, add `-raw`.
-
-Example: http://scri.ch/baf-raw.png
-
-## Requirements
-
- * PHP 5.3
- * MySQL 5.x
- * [Imagick](http://php.net/imagick) PHP Extension
+For example: [scri.ch/baf-2x.png](https://scri.ch/baf-2x.png).
 
 ## Installation
 
- * [Download scri.ch](https://github.com/bpierre/scri.ch/zipball/master)
- * Extract the package
- * Install the dependencies with [Composer](http://getcomposer.org/) `$ composer install`
- * /tmp and /drawings directories must be writable by the webserver
- * Create a new database
- * Execute `schema.sql` on the database
- * Rename `config-example.php` to `config.php`
- * Edit `config.php` (see below)
+Install [Bun](https://bun.sh/) 1.4 or newer, download this project, and run:
 
-### config.php
-
-```php
-define('SCRICH_URL', 'http://scri.ch/');
+```sh
+bun install --frozen-lockfile
+bun run dev
 ```
 
-Full URL with trailing slash
+Open <http://localhost:3000> and draw!
 
-```php
-define('DB_DSN',  'mysql:dbname=scrich;host=localhost');
+Drawings are saved in `/tmp/scrich-development`. To choose another folder:
+
+```sh
+DATA_DIR=/path/to/drawings bun run dev
 ```
 
-Database DSN ([PDO style](http://php.net/manual/en/ref.pdo-mysql.connection.php))
+Upgrading from 1.2? See [UPGRADE.md](UPGRADE.md).
 
-```php
-define('DB_USER', 'username');
+## Production
+
+To run your own scri.ch, build the app and start it with your domain and data folder:
+
+```sh
+bun run build
+
+NODE_ENV=production \
+DATA_DIR=/srv/scrich-data \
+PUBLIC_ORIGIN=https://draw.example.org \
+bun run start
 ```
 
-Database username
+Replace the domain and data folder with your own. `DATA_DIR` must be an absolute path the server
+can write to. The server listens on `127.0.0.1:3000`; use `HOST` or `PORT` to change it.
 
-```php
-define('DB_PASS', 'password');
+Use a reverse proxy for HTTPS. Forward drawing pages and PNG requests to Bun, respect its cache
+headers, and allow uploads of at least 11 MiB. Include `dist/` when deploying, or build on the server.
+
+Zoom exports allow up to 160 megapixels. Set `MAX_EXPORT_PIXELS` to change that limit.
+
+Use a service manager to keep scri.ch running. To back up drawings, stop it and copy `DATA_DIR`.
+
+Set `GALLERY_USERNAME` and `GALLERY_PASSWORD` to enable the password-protected `/gallery` page.
+To hide or restore a drawing, use your server's data folder:
+
+```sh
+DATA_DIR=/srv/scrich-data bun run drawing:hide <id>
+DATA_DIR=/srv/scrich-data bun run drawing:unhide <id>
 ```
 
-Database password
+Hiding keeps the drawing so you can restore it later. Cached images may stay visible for five minutes.
 
-```php
-define('DEBUG', FALSE);
+## Development
+
+`bun run dev` picks up your changes. Reload the browser to see them.
+
+To run the checks:
+
+```sh
+bunx playwright install chromium # Only needed once
+bun run check
 ```
 
-Wanna debug?
-
-### .htaccess (Apache HTTP Server)
-
-If you are using the Apache HTTP Server, change the `RewriteBase` directive to the scri.ch path (default is `/`).
-
-### Other HTTP server (Nginx, Lighttpd, etc.)
-
-If you are using another HTTP server, you just need to redirect all requests to: `index.php?r=$request`.
+See [CHANGELOG.md](CHANGELOG.md) for changes.
 
 ## Credits
 
-A simple idea by [Pierre Bertet](http://pierrebertet.net/) and [Raphaël Bastide](http://raphaelbastide.com)
+A simple idea by [Pierre Bertet](https://pierrebertet.net/) and
+[Raphaël Bastide](https://raphaelbastide.com/).
 
- * [Aude Debout](http://aude-debout.fr/): 404 drawing, testing
- * [Quick and Dirty](https://twitter.com/qndirty): (pro scricher): testing, evangelism
- * [Jimpunk](http://www.jimpunk.com/.net/index.php?s=scri.ch): scri.ch artist
+- [Aude Debout](http://aude-debout.fr/): 404 drawing, testing
+- [Quick and Dirty](https://twitter.com/qndirty): testing, evangelism
+- [Jimpunk](http://www.jimpunk.com/.net/index.php?s=scri.ch): scri.ch artist
 
-## More info
+## License
 
-[See about page](http://about.scri.ch/)
+[MIT](LICENSE)

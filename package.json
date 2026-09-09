@@ -1,0 +1,31 @@
+{
+  "name": "scri.ch",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "bun": ">=1.4.0"
+  },
+  "scripts": {
+    "dev": "bun scripts/dev.ts",
+    "build": "bun scripts/build.ts",
+    "drawing:hide": "bun scripts/drawing-visibility.ts hide",
+    "drawing:unhide": "bun scripts/drawing-visibility.ts unhide",
+    "start": "bun src/server/index.ts",
+    "migrate:mysql-to-sqlite": "bun scripts/migration/mysql-to-sqlite.ts",
+    "format": "dprint fmt",
+    "format:check": "dprint check",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "check": "bun run format:check && bun run typecheck && bun test"
+  },
+  "dependencies": {
+    "sharp": "0.34.3"
+  },
+  "devDependencies": {
+    "@types/bun": "1.2.21",
+    "dprint": "0.50.2",
+    "playwright": "^1.63.0",
+    "typescript": "5.9.2"
+  }
+}

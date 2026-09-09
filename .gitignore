@@ -1,2 +1,13 @@
 config.php
+.env
 vendor
+node_modules/
+.certs/
+log/
+data/
+/scrich.sql.gz
+/stats/
+/analysis/
+/drawing-parents-*.json
+
+/dist/
