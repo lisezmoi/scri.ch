@@ -1,6 +1,11 @@
+# Local files retained from PHP installations; never commit their data or credentials.
 config.php
+vendor/
+/drawings/
+/plugins/
+/tmp/
+
 .env
-vendor
 node_modules/
 .certs/
 log/

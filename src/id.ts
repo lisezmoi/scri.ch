@@ -1,3 +1,5 @@
+// Keep historical route names reserved, even after removing their PHP directories.
+// Allocating them to drawings would reuse URLs with an existing meaning.
 export const RESERVED_IDS = new Set([
   "404",
   "about",
