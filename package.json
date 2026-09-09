@@ -20,12 +20,12 @@
     "check": "bun run format:check && bun run typecheck && bun test"
   },
   "dependencies": {
-    "sharp": "0.34.3"
+    "sharp": "0.35.4"
   },
   "devDependencies": {
-    "@types/bun": "1.2.21",
-    "dprint": "0.50.2",
+    "@types/bun": "1.4.2",
+    "dprint": "0.57.4",
     "playwright": "^1.63.0",
-    "typescript": "5.9.2"
+    "typescript": "7.0.2"
   }
 }

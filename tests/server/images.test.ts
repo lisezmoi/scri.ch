@@ -205,7 +205,7 @@ test("zoom generation is serialized and a failed zoom releases the queue", async
   let peak = 0;
   const toFile = sharp.prototype.toFile;
   const spy = spyOn(sharp.prototype, "toFile").mockImplementation(
-    async function(this: sharp.Sharp, path: string) {
+    async function(this: ReturnType<typeof sharp>, path: string) {
       if (!/-[234]x\.png\./.test(path)) return await toFile.call(this, path);
       active++;
       peak = Math.max(peak, active);
