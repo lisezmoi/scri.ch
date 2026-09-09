@@ -20,7 +20,7 @@
     "check": "bun run format:check && bun run typecheck && bun test"
   },
   "dependencies": {
-    "sharp": "0.34.3"
+    "sharp": "0.35.4"
   },
   "devDependencies": {
     "@types/bun": "1.2.21",
