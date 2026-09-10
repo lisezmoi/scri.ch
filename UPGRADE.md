@@ -1,6 +1,6 @@
 # Upgrading scri.ch
 
-## Next version
+## From 2.0 to 2.1
 
 After deploying this update, backfill dimensions for existing drawings:
 

@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.1.0 — 2026-09-10
+
+### Added
+
+- Store crop dimensions during saves to prevent gallery layout shifts; add a backfill command for existing drawings.
+- Open Graph and Twitter card metadata for drawing previews.
+- Offline repair tool for browser-readable damaged PNGs, preserving originals and recording repair hashes.
+
+### Changed
+
+- Update Sharp, Bun types, dprint, and TypeScript.
+- Remove obsolete PHP-era files.
+
+### Fixed
+
+- Prevent migration from reusing URLs belonging to rejected drawings or orphan media.
+- Archive excluded media with filenames, sizes, and hashes.
+- Accept single-database dumps without `USE` through `--database scrich`.
+- Support multiline SQL inserts while preserving quoted values.
+
 ## 2.0.0 — 2026-09-09
 
 ### Added
