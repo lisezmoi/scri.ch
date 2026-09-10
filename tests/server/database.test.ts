@@ -61,6 +61,8 @@ test("upgrades legacy schemas repeatedly while preserving rows and allocator", (
     const database = new DrawingDatabase(path);
     try {
       expect(database.find("b")).toEqual({
+        cropWidth: null,
+        cropHeight: null,
         parent: null,
         id: 17,
         shortId: "b",
@@ -101,5 +103,26 @@ test("preserves parent relationships across repeated upgrades", () => {
     expect(database.find(child.shortId)?.parent).toBe(17);
     expect(database.list(0, 10).find(row => row.shortId === child.shortId)?.parent).toBe(17);
     database.close();
+  }
+});
+
+test("persists paired image dimensions through upgrades and rejects invalid sizes", () => {
+  const directory = mkdtempSync("/tmp/scrich-dimensions-db-");
+  directories.push(directory);
+  const path = join(directory, "db.sqlite");
+  let db = new DrawingDatabase(path);
+  db.insertImported({ id: 1, shortId: "1", settings: {}, createdAt: "2026-01-01" });
+  expect(db.find("1")?.cropWidth).toBeNull();
+  for (const [width, height] of [[0, 10], [10, -1], [1.5, 10], [10, NaN]]) {
+    expect(() => db.setCropDimensions("1", width!, height!)).toThrow();
+  }
+  db.setCropDimensions("1", 123, 45);
+  db.close();
+  for (let i = 0; i < 2; i++) {
+    db = new DrawingDatabase(path);
+    expect(db.find("1")).toMatchObject({ cropWidth: 123, cropHeight: 45 });
+    expect(db.list(0, 10)[0]).toMatchObject({ cropWidth: 123, cropHeight: 45 });
+    expect(db.missingCropDimensions(0)).toEqual([]);
+    db.close();
   }
 });

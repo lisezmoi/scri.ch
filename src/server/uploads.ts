@@ -48,6 +48,14 @@ export async function saveDrawing(
       },
       parent ? parent as string : null,
     );
+    // The original and database row are committed. Preview failure must not undo the save.
+    destination = undefined;
+    try {
+      const { width, height } = await images.dimensions(drawing);
+      database.setCropDimensions(drawing.shortId, width, height);
+    } catch (error) {
+      console.error(`Failed to prepare preview for ${drawing.shortId}`, error);
+    }
     return new Response(null, { status: 303, headers: { location: `/${drawing.shortId}` } });
   } catch (error) {
     if (temporary && existsSync(temporary)) unlinkSync(temporary);

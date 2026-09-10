@@ -164,7 +164,7 @@ export async function migrate(options: MigrationOptions): Promise<MigrationRepor
     throw new Error("Historical drawing IDs exhaust the allocator");
   }
   const orphanIds = [...new Set([...rawIds, ...related.keys()])].filter((id) => !groups.has(id));
-  const accepted: Omit<DrawingRecord, "visibility">[] = [];
+  const accepted: Omit<DrawingRecord, "visibility" | "cropWidth" | "cropHeight">[] = [];
   const rejected: RejectedEntry[] = [];
   let duplicateGroupsCollapsed = 0;
   let duplicateRowsCollapsed = 0;

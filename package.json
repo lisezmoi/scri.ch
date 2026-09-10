@@ -18,7 +18,8 @@
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "check": "bun run format:check && bun run typecheck && bun test",
-    "migrate:repair-pngs": "bun scripts/migration/repair-pngs.ts"
+    "migrate:repair-pngs": "bun scripts/migration/repair-pngs.ts",
+    "drawing:backfill-dimensions": "bun scripts/backfill-dimensions.ts"
   },
   "dependencies": {
     "sharp": "0.35.4"

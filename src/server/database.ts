@@ -5,6 +5,9 @@ import type { DrawingSettings } from "../settings";
 export type DrawingVisibility = "visible" | "hidden";
 
 export interface DrawingRecord {
+  // Dimensions of the normal .png export (including cropping/padding), not the raw canvas.
+  cropWidth: number | null;
+  cropHeight: number | null;
   parent: number | null;
   visibility: DrawingVisibility;
   id: number;
@@ -14,6 +17,8 @@ export interface DrawingRecord {
 }
 
 interface DrawingRow {
+  crop_width: number | null;
+  crop_height: number | null;
   parent: number | null;
   visibility: DrawingVisibility;
   id: number;
@@ -27,6 +32,8 @@ export const DATABASE_SCHEMA = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     short_id TEXT NOT NULL UNIQUE,
     parent INTEGER REFERENCES drawings(id) DEFERRABLE INITIALLY DEFERRED,
+    crop_width INTEGER CHECK (crop_width IS NULL OR (typeof(crop_width) = 'integer' AND crop_width > 0)),
+    crop_height INTEGER CHECK (crop_height IS NULL OR (typeof(crop_height) = 'integer' AND crop_height > 0)),
     settings_json TEXT NOT NULL CHECK (json_valid(settings_json)),
     created_at TEXT NOT NULL,
     visibility TEXT NOT NULL DEFAULT 'visible' CHECK (visibility IN ('visible', 'hidden'))
@@ -41,6 +48,8 @@ export const DATABASE_SCHEMA = `
 
 function record(row: DrawingRow): DrawingRecord {
   return {
+    cropWidth: row.crop_width,
+    cropHeight: row.crop_height,
     parent: row.parent,
     visibility: row.visibility,
     id: row.id,
@@ -66,6 +75,13 @@ export class DrawingDatabase {
     this.raw.transaction(() => {
       this.raw.exec(DATABASE_SCHEMA);
       const columns = this.raw.query<{ name: string; }, []>("PRAGMA table_info(drawings)").all();
+      for (const name of ["crop_width", "crop_height"]) {
+        if (!columns.some((column) => column.name === name)) {
+          this.raw.exec(
+            `ALTER TABLE drawings ADD COLUMN ${name} INTEGER CHECK (${name} IS NULL OR (typeof(${name}) = 'integer' AND ${name} > 0))`,
+          );
+        }
+      }
       if (!columns.some((column) => column.name === "visibility")) {
         this.raw.exec(
           "ALTER TABLE drawings ADD COLUMN visibility TEXT NOT NULL DEFAULT 'visible' CHECK (visibility IN ('visible', 'hidden'))",
@@ -85,16 +101,32 @@ export class DrawingDatabase {
 
   find(shortId: string): DrawingRecord | null {
     const row = this.raw.query<DrawingRow, [string]>(
-      "SELECT id, parent, short_id, settings_json, created_at, visibility FROM drawings WHERE short_id = ?",
+      "SELECT id, parent, short_id, settings_json, created_at, visibility, crop_width, crop_height FROM drawings WHERE short_id = ?",
     ).get(shortId);
     return row ? record(row) : null;
   }
 
   list(offset: number, limit: number): DrawingRecord[] {
     return this.raw.query<DrawingRow, [number, number]>(
-      `SELECT id, parent, short_id, settings_json, created_at, visibility
+      `SELECT id, parent, short_id, settings_json, created_at, visibility, crop_width, crop_height
        FROM drawings ORDER BY id DESC LIMIT ? OFFSET ?`,
     ).all(limit, offset).map(record);
+  }
+
+  missingCropDimensions(afterId: number, limit = 100): DrawingRecord[] {
+    return this.raw.query<DrawingRow, [number, number]>(
+      `SELECT id, parent, short_id, settings_json, created_at, visibility, crop_width, crop_height
+       FROM drawings WHERE id > ? AND (crop_width IS NULL OR crop_height IS NULL)
+       ORDER BY id LIMIT ?`,
+    ).all(afterId, limit).map(record);
+  }
+
+  setCropDimensions(shortId: string, width: number, height: number): void {
+    if (![width, height].every(value => Number.isSafeInteger(value) && value > 0)) {
+      throw new Error("Image dimensions must be positive integers");
+    }
+    this.raw.query("UPDATE drawings SET crop_width = ?, crop_height = ? WHERE short_id = ?")
+      .run(width, height, shortId);
   }
 
   count(): number {
@@ -103,7 +135,9 @@ export class DrawingDatabase {
   }
 
   insertImported(
-    row: Omit<DrawingRecord, "visibility" | "parent"> & { parent?: number | null; },
+    row: Omit<DrawingRecord, "visibility" | "parent" | "cropWidth" | "cropHeight"> & {
+      parent?: number | null;
+    },
   ): void {
     this.raw.query(
       `INSERT INTO drawings (id, short_id, settings_json, created_at, parent) VALUES (?, ?, ?, ?, ?)`,
@@ -140,6 +174,8 @@ export class DrawingDatabase {
       ).run(shortId, JSON.stringify(settings), createdAt, parent);
       beforeCommit(shortId);
       return {
+        cropWidth: null,
+        cropHeight: null,
         parent,
         id: Number(result.lastInsertRowid),
         shortId,

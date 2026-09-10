@@ -116,7 +116,10 @@ export function renderGallery(
     if (drawing.visibility === "hidden") {
       return `<li><h2>/${id} <span>(${date})</span></h2><p>Hidden</p></li>`;
     }
-    return `<li><h2>/${id} <span>(${date})</span></h2><a href="/${id}"><img src="/${id}.png" alt="/${id}"></a></li>`;
+    const dimensions = drawing.cropWidth && drawing.cropHeight
+      ? ` width="${drawing.cropWidth}" height="${drawing.cropHeight}"`
+      : "";
+    return `<li><h2>/${id} <span>(${date})</span></h2><a href="/${id}"><img src="/${id}.png" alt="/${id}"${dimensions}></a></li>`;
   }).join("\n");
   return `<!doctype html>
 <html><head><meta charset="utf-8"><title>scri.ch - Gallery</title>

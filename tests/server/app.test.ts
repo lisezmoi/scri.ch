@@ -341,3 +341,32 @@ test("sharing metadata exposes a fetchable drawing PNG without JavaScript and om
     expect(body).not.toContain("rel=\"canonical\"");
   }
 });
+
+test("stores preview dimensions before redirect and preserves saves when previews fail", async () => {
+  const { app } = appWithData();
+  const saved = await postPng(app);
+  const path = saved.headers.get("location")!;
+  const png = await app.fetch(new Request(`https://scri.ch${path}.png`));
+  const metadata = await sharp(await png.arrayBuffer()).metadata();
+  expect(app.database.find(path.slice(1))).toMatchObject({
+    cropWidth: metadata.width,
+    cropHeight: metadata.height,
+  });
+  const spy = spyOn(ImageService.prototype, "dimensions").mockRejectedValue(
+    new Error("preview failed"),
+  );
+  const log = spyOn(console, "error").mockImplementation(() => {});
+  try {
+    const second = await postPng(app);
+    expect(second.status).toBe(303);
+    const id = second.headers.get("location")!.slice(1);
+    expect(app.database.find(id)).toMatchObject({ cropWidth: null, cropHeight: null });
+    const original = await app.fetch(new Request(`https://scri.ch/${id}-raw.png`));
+    expect(original.status).toBe(200);
+    expect((await sharp(await original.arrayBuffer()).metadata()).format).toBe("png");
+    expect(log).toHaveBeenCalled();
+  } finally {
+    spy.mockRestore();
+    log.mockRestore();
+  }
+});

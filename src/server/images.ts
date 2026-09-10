@@ -20,6 +20,13 @@ export class ImageService {
     return join(this.#config.drawingsDir, `${shortId}.png`);
   }
 
+  async dimensions(drawing: DrawingRecord): Promise<{ width: number; height: number; }> {
+    const path = await this.resolve(drawing, "default");
+    const { width, height } = await sharp(path, { limitInputPixels: false }).metadata();
+    if (!width || !height) throw new Error(`Missing image dimensions: ${drawing.shortId}`);
+    return { width, height };
+  }
+
   async resolve(
     drawing: DrawingRecord,
     mode: "raw" | "cropped" | "default" | 2 | 3 | 4,

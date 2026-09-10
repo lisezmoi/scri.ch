@@ -1,6 +1,19 @@
-# Upgrading from scri.ch 1.2 to 2.0
+# Upgrading scri.ch
 
-## 1. Prepare
+## Next version
+
+After deploying this update, backfill dimensions for existing drawings:
+
+```sh
+DATA_DIR=/srv/scrich-data bun run drawing:backfill-dimensions
+```
+
+The database columns are added automatically. The command prepares previews and skips completed
+rows; failures are reported by drawing ID and can be retried by running it again.
+
+## From 1.2 to 2.0
+
+### 1. Prepare
 
 Install Bun 1.4 or newer in the new application checkout, then run:
 
@@ -14,9 +27,9 @@ bun run build
 Stop writes to the PHP installation. Back up its MySQL database and `drawings/` directory, and
 keep the PHP deployment available until cutover is verified.
 
-## 2. Import
+### 2. Import
 
-### Optional: repair browser-readable damaged PNGs
+#### Optional: repair browser-readable damaged PNGs
 
 Some old PNGs are truncated but still display in browsers. The migration's strict decoder
 rejects them. To produce valid PNG copies of their browser-visible pixels:
@@ -50,7 +63,7 @@ cp /backups/scrich-png-repairs/drawings/*.png /backups/scrich-migration-media/
 Run the importer below with `--media-dir /backups/scrich-migration-media`. Retain the original
 SQL/media backup and the repair manifest so normalized images can be traced to their originals.
 
-### Run the importer
+#### Run the importer
 
 Use an uncompressed SQL dump containing the `scrich` database, a `USE scrich;` statement, and standard
 `INSERT INTO` statements without column lists. Inserts may span multiple lines; LF and CRLF
@@ -78,7 +91,7 @@ Keep the complete original SQL/media backup too; files outside the recognized na
 are not migration inputs. Conflicting duplicates or
 missing or rejected parents stop the import. Resolve failures and retry with new output paths.
 
-## 3. Start
+### 3. Start
 
 `config.php` is replaced by environment variables. Set an absolute `DATA_DIR` writable by the Bun
 process and a `PUBLIC_ORIGIN` without a subdirectory. Replace the example domain and credentials:
@@ -95,7 +108,7 @@ bun run start
 Omit both gallery variables to disable the gallery. Configure your service manager to run this
 command with the same environment. Bun listens on `127.0.0.1:3000` by default.
 
-## 4. Switch traffic
+### 4. Switch traffic
 
 - Check imported drawing pages, raw/cropped/zoom PNGs, gallery authentication, and a new upload.
 - Point your TLS reverse proxy at Bun. Replace PHP rewrite rules and direct drawing-file serving;

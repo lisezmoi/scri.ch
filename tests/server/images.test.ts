@@ -34,6 +34,8 @@ for (const background of [undefined, "#ff0000"]) {
           shortId: "1",
           createdAt: "2026-01-01",
           visibility: "visible",
+          cropWidth: null,
+          cropHeight: null,
           parent: null,
           settings: background ? { background } : {},
         };
@@ -133,6 +135,8 @@ for (const fixedSize of [false, true]) {
             shortId,
             createdAt: "2026-01-01",
             visibility: "visible",
+            cropWidth: null,
+            cropHeight: null,
             parent: null,
             settings: {
               foreground: "#00ff00",
@@ -146,6 +150,12 @@ for (const fixedSize of [false, true]) {
           for (const mode of ["default", "cropped", 2, 3, 4] as const) {
             const path = await images.resolve(drawing, mode);
             const metadata = await sharp(path).metadata();
+            if (mode === "default") {
+              expect(await images.dimensions(drawing)).toEqual({
+                width: metadata.width,
+                height: metadata.height,
+              });
+            }
             const factor = typeof mode === "number" ? mode : 1;
             const base = mode === "cropped" ? [10, 8] : fixedSize ? [60, 40] : [50, 48];
             expect([metadata.width, metadata.height, metadata.hasAlpha])
@@ -180,6 +190,8 @@ test("exports a 2880x1800 drawing at 4x and respects a configured lower limit", 
       shortId: "1",
       createdAt: "2026-01-01",
       visibility: "visible",
+      cropWidth: null,
+      cropHeight: null,
       parent: null,
       settings: { size: { width: 2880, height: 1800 } },
     };
@@ -226,6 +238,8 @@ test("zoom generation is serialized and a failed zoom releases the queue", async
       shortId: "1",
       createdAt: "2026-01-01",
       visibility: "visible",
+      cropWidth: null,
+      cropHeight: null,
       parent: null,
       settings: { size: { width: 20, height: 20 } },
     };
