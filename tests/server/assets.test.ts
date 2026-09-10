@@ -80,3 +80,22 @@ test("page bootstrap is inert JSON and escapes script-closing input", async () =
   expect(JSON.parse(json).settings).toEqual({ background: "#123456" });
   expect(JSON.parse(json).drawingUrl).toBeNull();
 });
+
+test("cached stats HTML picks up rebuilt stylesheets and scripts immediately", async () => {
+  const directory = fixture();
+  const original = await build(directory);
+  const app = createApp(loadConfig({ DATA_DIR: join(directory, "data") }), directory);
+  try {
+    const request = new Request("https://scri.ch/stats");
+    expect(await (await app.fetch(request)).text()).toContain(original["admin.css"]);
+    const rebuilt = await build(directory, true);
+    expect(rebuilt["admin.css"]).not.toBe(original["admin.css"]);
+    const body = await (await app.fetch(request)).text();
+    for (const asset of ["admin.css", "stats.js"] as const) {
+      expect(body).toContain(rebuilt[asset]);
+      expect((await app.fetch(new Request(`https://scri.ch${rebuilt[asset]}`))).status).toBe(200);
+    }
+  } finally {
+    app.close();
+  }
+});

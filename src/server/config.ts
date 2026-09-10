@@ -11,7 +11,8 @@ export interface AppConfig {
   cacheDir: string;
   temporaryDir: string;
   databasePath: string;
-  galleryCredentials: { username: string; password: string; } | null;
+  galleryPassword: string | null;
+  statsPassword: string | null;
 }
 
 export interface ConfigEnvironment {
@@ -21,7 +22,7 @@ export interface ConfigEnvironment {
   PORT?: string;
   PUBLIC_ORIGIN?: string;
   DATA_DIR?: string;
-  GALLERY_USERNAME?: string;
+  STATS_PASSWORD?: string;
   GALLERY_PASSWORD?: string;
 }
 
@@ -49,12 +50,6 @@ export function loadConfig(environment: ConfigEnvironment = process.env): AppCon
     throw new Error("Production PUBLIC_ORIGIN is required");
   }
 
-  const username = environment.GALLERY_USERNAME;
-  const password = environment.GALLERY_PASSWORD;
-  if ((username && !password) || (!username && password)) {
-    throw new Error("GALLERY_USERNAME and GALLERY_PASSWORD must be configured together");
-  }
-
   return {
     debug: !production,
     maxExportPixels,
@@ -66,6 +61,7 @@ export function loadConfig(environment: ConfigEnvironment = process.env): AppCon
     cacheDir: join(dataDir, "cache", "v3"),
     temporaryDir: join(dataDir, "tmp"),
     databasePath: join(dataDir, "scrich.sqlite"),
-    galleryCredentials: username && password ? { username, password } : null,
+    galleryPassword: environment.GALLERY_PASSWORD || null,
+    statsPassword: environment.STATS_PASSWORD || null,
   };
 }

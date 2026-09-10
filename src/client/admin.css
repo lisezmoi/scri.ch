@@ -17,3 +17,24 @@ form{display:inline;position:relative;top:6px;}
 #drawing-list li{float:left;width:100%;margin:0 0 30px 0;}
 #drawing-list li a{float:left;max-width:100%;}
 #drawing-list li img{height:auto;image-rendering:pixelated;float:left;max-width:100%;border:1px dotted grey;}
+.stats{margin-bottom:80px;}
+.stats main{margin:0 20px;}
+.stats header{margin-bottom:32px;}
+.stats a{border-bottom:1px dotted gray;}
+.stats [aria-current]{font-weight:bold;border:0;}
+.stats-chart-heading{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;margin:16px 0;}
+.stats-chart-heading [aria-label="Graph scale"]{margin-left:auto;}
+.stats-chart{display:flex;gap:12px;}
+.stats-axis{flex:none;overflow:visible;}
+.stats-plot{flex:1;min-width:0;}
+.stats form{position:static;display:flex;align-items:center;gap:8px;}
+.stats select,.stats button{font:inherit;}
+.stats svg{display:block;}
+.stats svg text{letter-spacing:0;}
+#stats-readout{margin:8px 0 0 60px;min-height:16px;line-height:16px;font-size:11px;letter-spacing:0;}
+.stats details{margin-top:16px;}
+.stats summary{cursor:pointer;}
+.stats table{margin-top:16px;border-collapse:collapse;font-size:17px;letter-spacing:0;}
+.stats th,.stats td{padding:4px 24px 4px 0;text-align:left;font-weight:normal;}
+.stats td{text-align:right;}
+.stats thead{border-bottom:1px dotted gray;}

@@ -29,7 +29,8 @@ function appWithData(): { app: ScrichApp; config: AppConfig; } {
     cacheDir: join(dataDir, "cache", "v3"),
     temporaryDir: join(dataDir, "tmp"),
     databasePath: join(dataDir, "scrich.sqlite"),
-    galleryCredentials: { username: "viewer", password: "secret" },
+    galleryPassword: "secret",
+    statsPassword: "secret",
   };
   const app = createApp(config, assetDirectory);
   cleanups.push(() => {
@@ -368,5 +369,67 @@ test("stores preview dimensions before redirect and preserves saves when preview
   } finally {
     spy.mockRestore();
     log.mockRestore();
+  }
+});
+
+test("serves protected stats and the legacy redirect with its password", async () => {
+  const { app } = appWithData();
+  const headers = { authorization: `Basic ${btoa("viewer:secret")}` };
+  for (const path of ["/stats", "/stats/", "/stats.php"]) {
+    expect((await app.fetch(new Request(`https://scri.ch${path}`))).status).toBe(401);
+    const response = await app.fetch(new Request(`https://scri.ch${path}`, { headers }));
+    expect(response.status).toBe(path === "/stats.php" ? 301 : 200);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+  }
+});
+
+test("stats routes are public without a stats password while gallery remains protected", async () => {
+  const { app, config } = appWithData();
+  config.statsPassword = null;
+  for (const path of ["/stats", "/stats/", "/stats.php"]) {
+    const response = await app.fetch(new Request(`https://scri.ch${path}`));
+    expect(response.status).toBe(path === "/stats.php" ? 301 : 200);
+    expect(response.headers.get("www-authenticate")).toBeNull();
+  }
+  expect((await app.fetch(new Request("https://scri.ch/gallery"))).status).toBe(401);
+});
+
+test("each page requires only its own password, with separate authentication realms", async () => {
+  const { app, config } = appWithData();
+  for (const galleryPassword of [null, "gallery-secret"]) {
+    config.galleryPassword = galleryPassword;
+    for (const statsPassword of [null, "stats-secret"]) {
+      config.statsPassword = statsPassword;
+      for (
+        const [path, password] of [["/gallery", galleryPassword], [
+          "/stats",
+          statsPassword,
+        ]] as const
+      ) {
+        const request = new Request(`https://scri.ch${path}`);
+        const anonymous = await app.fetch(request);
+        expect(anonymous.status).toBe(password ? 401 : 200);
+        if (password) {
+          expect(anonymous.headers.get("www-authenticate")).toContain(`scri.ch ${path.slice(1)}`);
+        }
+        for (const username of ["", "viewer"]) {
+          const authorization = `Basic ${btoa(`${username}:${password ?? "anything"}`)}`;
+          expect((await app.fetch(new Request(request, { headers: { authorization } }))).status)
+            .toBe(200);
+        }
+        const otherPassword = path === "/gallery" ? "stats-secret" : "gallery-secret";
+        for (
+          const authorization of [
+            `Basic ${btoa(`:${otherPassword}`)}`,
+            `Basic ${btoa(password ?? "no-colon")}`,
+            "Basic !",
+            "Bearer wrong",
+          ]
+        ) {
+          expect((await app.fetch(new Request(request, { headers: { authorization } }))).status)
+            .toBe(password ? 401 : 200);
+        }
+      }
+    }
   }
 });

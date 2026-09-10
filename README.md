@@ -84,7 +84,8 @@ Zoom exports allow up to 160 megapixels. Set `MAX_EXPORT_PIXELS` to change that 
 
 Use a service manager to keep scri.ch running. To back up drawings, stop it and copy `DATA_DIR`.
 
-Set `GALLERY_USERNAME` and `GALLERY_PASSWORD` to enable the password-protected `/gallery` page.
+Set `GALLERY_PASSWORD` or `STATS_PASSWORD` to protect that page; empty or unset means public.
+The browser login checks only the password; the username can be left blank.
 To hide or restore a drawing, use your server's data folder:
 
 ```sh

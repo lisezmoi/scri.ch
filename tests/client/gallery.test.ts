@@ -13,7 +13,6 @@ test("gallery reserves image space before loading on wide and narrow screens", a
   await build(assets);
   const config = loadConfig({
     DATA_DIR: join(root, "data"),
-    GALLERY_USERNAME: "user",
     GALLERY_PASSWORD: "pass",
   });
   const app = createApp(config, assets);
@@ -37,7 +36,7 @@ test("gallery reserves image space before loading on wide and narrow screens", a
     for (const width of [1400, 400]) {
       const page = await browser.newPage({
         viewport: { width, height: 1000 },
-        httpCredentials: { username: "user", password: "pass" },
+        httpCredentials: { username: "", password: "pass" },
       });
       let release!: () => void;
       const ready = new Promise<void>(resolve => {

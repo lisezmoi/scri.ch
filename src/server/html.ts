@@ -5,12 +5,12 @@ import type { DrawingRecord } from "./database";
 
 export type PageConfig = AppConfig & { clientAssets: ClientManifest; };
 
-function escapeHtml(value: string): string {
+export function escapeHtml(value: string): string {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
     .replaceAll("\"", "&quot;").replaceAll("'", "&#39;");
 }
 
-function scriptJson(value: unknown): string {
+export function scriptJson(value: unknown): string {
   return JSON.stringify(value).replaceAll("<", "\\u003c").replaceAll("&", "\\u0026");
 }
 

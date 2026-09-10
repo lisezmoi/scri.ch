@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-export type ClientManifest = Record<"scrich.js" | "scrich.css" | "admin.css", string>;
+export type ClientManifest = Record<"scrich.js" | "stats.js" | "scrich.css" | "admin.css", string>;
 export const DIST_DIR = resolve(import.meta.dir, "../../dist");
 
 export function loadAssets(directory = DIST_DIR) {
@@ -9,7 +9,7 @@ export function loadAssets(directory = DIST_DIR) {
     const manifest: ClientManifest = JSON.parse(
       readFileSync(join(directory, "manifest.json"), "utf8"),
     );
-    for (const name of ["scrich.js", "scrich.css", "admin.css"] as const) {
+    for (const name of ["scrich.js", "stats.js", "scrich.css", "admin.css"] as const) {
       const url = manifest[name];
       const extension = name.split(".")[1];
       if (

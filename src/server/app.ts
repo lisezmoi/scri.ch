@@ -9,6 +9,7 @@ import { galleryResponse } from "./gallery";
 import { renderDrawingPage, renderFailure, renderNotFound } from "./html";
 import { ImageService } from "./images";
 import { fileResponse, html } from "./responses";
+import { createStatsResponse } from "./stats";
 import { saveDrawing } from "./uploads";
 
 const PROJECT_ROOT = resolve(import.meta.dir, "../..");
@@ -30,6 +31,7 @@ export function createApp(config: AppConfig, assetDirectory = DIST_DIR): ScrichA
   mkdirSync(config.temporaryDir, { recursive: true, mode: 0o700 });
   const database = new DrawingDatabase(config.databasePath);
   const images = new ImageService(config);
+  const statsResponse = createStatsResponse(database);
 
   async function fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
@@ -43,6 +45,9 @@ export function createApp(config: AppConfig, assetDirectory = DIST_DIR): ScrichA
       if (request.method !== "GET") return html(renderNotFound(pageConfig), 404);
       if (path === "/") {
         return html(renderDrawingPage(pageConfig, settingsFromQuery(url.searchParams)));
+      }
+      if (path === "/stats" || path === "/stats/" || path === "/stats.php") {
+        return statsResponse(request, pageConfig);
       }
       if (path === "/gallery" || path === "/gallery/") {
         return galleryResponse(request, pageConfig, database);

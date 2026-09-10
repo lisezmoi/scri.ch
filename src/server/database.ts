@@ -129,6 +129,13 @@ export class DrawingDatabase {
       .run(width, height, shortId);
   }
 
+  dailyCounts(): { date: string; count: number; }[] {
+    return this.raw.query<{ date: string; count: number; }, []>(
+      `SELECT date(created_at) AS date, COUNT(*) AS count FROM drawings
+       WHERE date(created_at) IS NOT NULL GROUP BY date(created_at) ORDER BY date`,
+    ).all();
+  }
+
   count(): number {
     return this.raw.query<{ total: number; }, []>("SELECT COUNT(*) AS total FROM drawings").get()!
       .total;

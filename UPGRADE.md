@@ -1,5 +1,10 @@
 # Upgrading scri.ch
 
+## From 2.1 to 2.2
+
+`GALLERY_PASSWORD` now works without a username. Set `STATS_PASSWORD` to protect stats separately.
+Either page is public when its password is empty or unset.
+
 ## From 2.0 to 2.1
 
 After deploying this update, backfill dimensions for existing drawings:
@@ -100,7 +105,6 @@ process and a `PUBLIC_ORIGIN` without a subdirectory. Replace the example domain
 NODE_ENV=production \
 DATA_DIR=/srv/scrich-data \
 PUBLIC_ORIGIN=https://draw.example.org \
-GALLERY_USERNAME=viewer \
 GALLERY_PASSWORD='replace-me' \
 bun run start
 ```

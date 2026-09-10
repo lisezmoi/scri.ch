@@ -1,25 +1,7 @@
-import { timingSafeEqual } from "node:crypto";
-import type { AppConfig } from "./config";
 import type { DrawingDatabase } from "./database";
-import { type PageConfig, renderFailure, renderGallery, renderNotFound } from "./html";
+import { type PageConfig, renderFailure, renderGallery } from "./html";
+import { requirePagePassword } from "./private";
 import { html } from "./responses";
-
-function authorized(request: Request, config: AppConfig): boolean {
-  const credentials = config.galleryCredentials;
-  if (!credentials) return false;
-  const header = request.headers.get("authorization");
-  if (!header?.startsWith("Basic ")) return false;
-  let supplied: string;
-  try {
-    supplied = Buffer.from(header.slice(6), "base64").toString("utf8");
-  } catch {
-    return false;
-  }
-  const expectedBuffer = Buffer.from(`${credentials.username}:${credentials.password}`);
-  const suppliedBuffer = Buffer.from(supplied);
-  return expectedBuffer.length === suppliedBuffer.length
-    && timingSafeEqual(expectedBuffer, suppliedBuffer);
-}
 
 export function galleryResponse(
   request: Request,
@@ -27,12 +9,8 @@ export function galleryResponse(
   database: DrawingDatabase,
 ): Response {
   const url = new URL(request.url);
-  if (!config.galleryCredentials) return html(renderNotFound(config), 404);
-  if (!authorized(request, config)) {
-    return html(renderFailure(config, 401, "Authentication required"), 401, {
-      "www-authenticate": "Basic realm=\"scri.ch gallery\", charset=\"UTF-8\"",
-    });
-  }
+  const denied = requirePagePassword(request, config, "gallery");
+  if (denied) return denied;
   const rawPage = url.searchParams.get("p") ?? "1";
   if (!/^[1-9][0-9]*$/.test(rawPage)) {
     return html(renderFailure(config, 400, "Invalid page"), 400);

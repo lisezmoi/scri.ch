@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.2.0 — 2026-09-10
+
+### Added
+
+- Drawing stats with optional password protection, monthly and daily graphs, logarithmic and linear scales, and a five-minute cache.
+
+### Changed
+
+- Control gallery and stats access independently with `GALLERY_PASSWORD` and `STATS_PASSWORD`; pages are public when their password is empty or unset.
+
+### Fixed
+
+- Refresh cached stats pages after asset rebuilds so stylesheets and scripts keep loading.
+- Let chart selection follow the pointer across the whole plot, including empty space above short bars.
+
 ## 2.1.0 — 2026-09-10
 
 ### Added
