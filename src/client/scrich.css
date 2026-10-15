@@ -16,8 +16,11 @@ canvas {
   image-rendering:-webkit-optimize-contrast;
   image-rendering:pixelated;
 }
-canvas.margin {
+#drawing-frame {
   position:absolute;
+  overflow:clip;
+}
+#drawing-frame.margin {
   outline:1px solid #ddd;
 }
 #img,

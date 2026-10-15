@@ -59,6 +59,103 @@ function pixel(image: Awaited<ReturnType<typeof pixels>>, x: number, y: number) 
   return [...image.data.subarray(start, start + 4)];
 }
 
+test("an initially empty canvas can initialize, draw, and save", async () => {
+  const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  try {
+    await page.route(server.url.href, async (route) => {
+      const response = await route.fetch();
+      await route.fulfill({
+        response,
+        body: (await response.text()).replace(
+          "<canvas id=\"drawing\">",
+          "<canvas id=\"drawing\" width=\"0\" height=\"0\">",
+        ),
+      });
+    }, { times: 1 });
+    await open(page);
+    await page.mouse.click(40, 50);
+    const image = await pixels(await save(page));
+    expect(pixel(image, 39, 49)).toEqual([0, 0, 0, 255]);
+    expect(await page.locator("#error").count()).toBe(0);
+    expect(errors).toEqual([]);
+  } finally {
+    await page.close();
+  }
+}, 30_000);
+
+for (const margin of [0, 20]) {
+  test(
+    `fractional viewport edges remain drawable without overflow (margin=${margin})`,
+    async () => {
+      const page = await browser.newPage({ viewport: { width: 800, height: 583 } });
+      try {
+        await open(page, `/?margin=${margin}`);
+        await page.addStyleTag({ content: "html { width: 799.5px; height: 582.5px; }" });
+        await page.evaluate(() => window.dispatchEvent(new Event("resize")));
+        await page.mouse.click(799.25 - margin, 582.25 - margin);
+        await page.evaluate(() => window.dispatchEvent(new Event("resize")));
+        const dimensions = await page.locator("canvas").evaluate(
+          (canvas: HTMLCanvasElement, margin) => {
+            const bounds = canvas.parentElement!.getBoundingClientRect();
+            const viewport = document.documentElement.getBoundingClientRect();
+            return {
+              width: canvas.width,
+              height: canvas.height,
+              displayWidth: canvas.getBoundingClientRect().width,
+              rightGap: viewport.right - bounds.right,
+              bottomGap: viewport.bottom - bounds.bottom,
+              edgeDrawable: document.elementFromPoint(
+                viewport.right - margin - 0.25,
+                viewport.bottom - margin - 0.25,
+              ) === canvas,
+              edgeAlpha: canvas.getContext("2d")!.getImageData(
+                canvas.width - 1,
+                canvas.height - 1,
+                1,
+                1,
+              ).data[3],
+            };
+          },
+          margin,
+        );
+        expect(dimensions.width).toBe(800 - margin * 2);
+        expect(dimensions.height).toBe(583 - margin * 2);
+        expect(dimensions.displayWidth).toBe(dimensions.width);
+        expect(dimensions.rightGap).toBe(margin);
+        expect(dimensions.bottomGap).toBe(margin);
+        expect(dimensions.edgeDrawable).toBe(true);
+        expect(dimensions.edgeAlpha).toBeGreaterThan(0);
+      } finally {
+        await page.close();
+      }
+    },
+    30_000,
+  );
+}
+
+test("drawings larger than the viewport remain accessible after resizing", async () => {
+  const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
+  try {
+    await open(page);
+    await page.mouse.click(740, 550);
+    await page.setViewportSize({ width: 650, height: 450 });
+    await page.waitForFunction(() => document.querySelector("canvas")!.width === 741);
+    const bounds = (await page.locator("#drawing-frame").boundingBox())!;
+    expect(bounds.width).toBe(741);
+    expect(bounds.height).toBe(551);
+    const scroll = await page.evaluate(() => [
+      document.documentElement.scrollWidth,
+      document.documentElement.scrollHeight,
+    ]);
+    expect(scroll[0]).toBeGreaterThanOrEqual(741);
+    expect(scroll[1]).toBeGreaterThanOrEqual(551);
+  } finally {
+    await page.close();
+  }
+}, 30_000);
+
 test(
   "mouse drawing survives resizing, saves legacy dimensions, and can be reopened and forked",
   async () => {

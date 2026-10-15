@@ -17,31 +17,49 @@ export function createDrawing(canvas: HTMLCanvasElement, settings: DrawingSettin
   let minimumWidth = 0;
   let minimumHeight = 0;
 
-  // Retain the existing canvas positioning and one canvas pixel per CSS pixel.
-  canvas.classList.add("margin");
-  canvas.style.left = `${margin}px`;
-  canvas.style.top = `${margin}px`;
+  // Clip fractional viewport edges without scaling pixels or hiding larger drawings.
+  const frame = document.createElement("div");
+  frame.id = "drawing-frame";
+  frame.classList.toggle("margin", margin > 0 || Boolean(settings.size));
+  canvas.before(frame);
+  frame.append(canvas);
 
   function resize(width?: number, height?: number) {
-    copy.width = canvas.width;
-    copy.height = canvas.height;
-    copyContext.clearRect(0, 0, copy.width, copy.height);
-    copyContext.drawImage(canvas, 0, 0);
+    const viewport = document.documentElement.getBoundingClientRect();
+    const availableWidth = Math.max(0, viewport.width - margin * 2);
+    const availableHeight = Math.max(0, viewport.height - margin * 2);
+    const viewportWidth = Math.ceil(availableWidth);
+    const viewportHeight = Math.ceil(availableHeight);
+    // A fresh canvas has no drawing to preserve; some browsers reject empty sources.
+    const preserve = minimumWidth > 0 && minimumHeight > 0
+      && canvas.width > 0 && canvas.height > 0;
+    if (preserve) {
+      copy.width = canvas.width;
+      copy.height = canvas.height;
+      copyContext.clearRect(0, 0, copy.width, copy.height);
+      copyContext.drawImage(canvas, 0, 0);
+    }
     canvas.width = settings.size?.width || width
-      || Math.max(window.innerWidth - margin * 2, minimumWidth);
+      || Math.max(viewportWidth, minimumWidth);
     canvas.height = settings.size?.height || height
-      || Math.max(window.innerHeight - margin * 2, minimumHeight);
-    if (settings.size?.width) {
-      canvas.style.left = `${(window.innerWidth - settings.size.width) / 2}px`;
-    }
-    if (settings.size?.height) {
-      canvas.style.top = `${(window.innerHeight - settings.size.height) / 2}px`;
-    }
+      || Math.max(viewportHeight, minimumHeight);
+    frame.style.width = `${
+      !settings.size?.width && canvas.width === viewportWidth ? availableWidth : canvas.width
+    }px`;
+    frame.style.height = `${
+      !settings.size?.height && canvas.height === viewportHeight ? availableHeight : canvas.height
+    }px`;
+    frame.style.left = `${
+      settings.size?.width ? (viewport.width - settings.size.width) / 2 : margin
+    }px`;
+    frame.style.top = `${
+      settings.size?.height ? (viewport.height - settings.size.height) / 2 : margin
+    }px`;
     if (background !== "transparent") {
       context.fillStyle = background;
       context.fillRect(0, 0, canvas.width, canvas.height);
     }
-    context.drawImage(copy, 0, 0);
+    if (preserve) context.drawImage(copy, 0, 0);
   }
 
   function track(x: number, y: number) {
